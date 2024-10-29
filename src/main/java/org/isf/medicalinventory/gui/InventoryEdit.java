@@ -84,6 +84,7 @@ import org.isf.medicals.manager.MedicalBrowsingManager;
 import org.isf.medicals.model.Medical;
 import org.isf.medicalstock.manager.MovStockInsertingManager;
 import org.isf.medicalstock.model.Lot;
+import org.isf.medicalstock.model.Movement;
 import org.isf.medstockmovtype.manager.MedicalDsrStockMovementTypeBrowserManager;
 import org.isf.medstockmovtype.model.MovementType;
 import org.isf.menu.manager.Context;
@@ -502,7 +503,8 @@ public class InventoryEdit extends ModalJFrame {
 					newReference = referenceTextField.getText().trim();
 					boolean refExist = false;
 					refExist = medicalInventoryManager.referenceExists(newReference);
-					if (refExist) {
+					Boolean referenceExistonMovementStock = movStockInsertingManager.refNoExists(newReference); 
+					if (refExist || referenceExistonMovementStock) {
 						MessageDialog.error(null, "angal.inventory.referencealreadyused.msg");
 						return;
 					}
@@ -579,7 +581,8 @@ public class InventoryEdit extends ModalJFrame {
 					String lastReference = inventory.getInventoryReference();
 					newReference = referenceTextField.getText().trim();
 					MedicalInventory existingInventory = medicalInventoryManager.getInventoryByReference(newReference);
-					if (existingInventory != null && existingInventory.getId() != inventory.getId()) {
+					Boolean referenceExistonMovementStock = movStockInsertingManager.refNoExists(newReference); 
+					if ((existingInventory != null && existingInventory.getId() != inventory.getId()) || referenceExistonMovementStock) {
 						MessageDialog.error(null, "angal.inventory.referencealreadyused.msg");
 						return;
 					}
