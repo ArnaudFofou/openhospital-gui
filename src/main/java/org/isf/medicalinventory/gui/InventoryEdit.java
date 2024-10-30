@@ -1016,6 +1016,7 @@ public class InventoryEdit extends ModalJFrame {
 		});
 		return validateButton;
 	}
+	
 	private JButton getConfirmButton() {
 		confirmButton = new JButton(MessageBundle.getMessage("angal.inventory.confirm.btn"));
 		confirmButton.setMnemonic(MessageBundle.getMnemonic("angal.inventory.confirm.btn.key"));
