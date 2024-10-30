@@ -448,7 +448,6 @@ public class MovStockMultipleCharging extends JDialog {
 								updateLot = true;
 								lot.setCost(cost);
 							}
-							lot.setMedical(med);
 						} while (lot == null);
 					}
 
