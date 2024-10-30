@@ -1041,7 +1041,7 @@ public class InventoryEdit extends ModalJFrame {
 				String errorMessage = this.checkParamsValues(chargeCode, dischargeCode, supplierId, wardCode);
 				if (errorMessage != null) {
 					MessageDialog.error(null, errorMessage);
-					return ;
+					return;
 				}
 				// confirm inventory
 				try {
