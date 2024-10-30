@@ -66,6 +66,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.EventListenerList;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -1328,6 +1330,7 @@ public class InventoryEdit extends ModalJFrame {
 					inventoryRowSearchList.set(r, invRow);
 					SwingUtilities.invokeLater(() -> {
 						jTableInventoryRow.updateUI();
+						disableValidateButton();
 					});
 				}
 			}
@@ -1871,9 +1874,15 @@ public class InventoryEdit extends ModalJFrame {
 			}
 			chargeCombo.addActionListener(actionEvent -> {
 				chargeType = (MovementType) chargeCombo.getSelectedItem();
-				if (validateButton.isEnabled()) {
-					validateButton.setEnabled(false);
-				}
+				if (inventory != null && chargeType != null && inventory.getChargeType() != null && !inventory.getChargeType().equals(chargeType.getCode())) {
+	    			 disableValidateButton();
+	    		} else {
+	    			if (inventory == null || chargeType == null) {
+	    				 disableValidateButton();
+	    			} else {
+	    				validateButton.setEnabled(true);	
+	    			}
+	    		}
 			});
 		}
 		return chargeCombo;
@@ -1903,9 +1912,15 @@ public class InventoryEdit extends ModalJFrame {
 			}
 			dischargeCombo.addActionListener(actionEvent -> {
 				dischargeType = (MovementType) dischargeCombo.getSelectedItem();
-				if (validateButton.isEnabled()) {
-					validateButton.setEnabled(false);
-				}
+				if (inventory != null && dischargeType != null && inventory.getDischargeType() != null && !inventory.getDischargeType().equals(dischargeType.getCode())) {
+	    			 disableValidateButton();
+	    		} else {
+	    			if (inventory == null || dischargeType == null) {
+	    				 disableValidateButton();
+	    			} else {
+	    				validateButton.setEnabled(true);	
+	    			}
+	    		}
 			});
 		}
 		return dischargeCombo;
@@ -1933,9 +1948,15 @@ public class InventoryEdit extends ModalJFrame {
 			}
 			supplierCombo.addActionListener(actionEvent -> {
 				supplier = (Supplier) supplierCombo.getSelectedItem();
-				if (validateButton.isEnabled()) {
-					validateButton.setEnabled(false);
-				}
+				if (inventory != null && supplier != null && inventory.getSupplier() != supplier.getSupId()) {
+	    			 disableValidateButton();
+	    		} else {
+	    			if (inventory == null || supplier == null) {
+	    				 disableValidateButton();
+	    			} else {
+	    				validateButton.setEnabled(true);	
+	    			}
+	    		}
 			});
 		}
 		return supplierCombo;
@@ -1963,9 +1984,15 @@ public class InventoryEdit extends ModalJFrame {
 			}
 			destinationCombo.addActionListener(actionEvent -> {
 				destination = (Ward) destinationCombo.getSelectedItem();
-				if (validateButton.isEnabled()) {
-					validateButton.setEnabled(false);
-				}
+				if (inventory != null && destination != null && inventory.getDestination() != null && !inventory.getDestination().equals(destination.getCode())) {
+	    			 disableValidateButton();
+	    		} else {
+	    			if (inventory == null || supplier == null) {
+	    				 disableValidateButton();
+	    			}  else {
+	    				validateButton.setEnabled(true);	
+	    			}
+	    		}
 			});
 		}
 		return destinationCombo;
@@ -1978,6 +2005,35 @@ public class InventoryEdit extends ModalJFrame {
 			if (inventory != null && !mode.equals("new")) {
 				referenceTextField.setText(inventory.getInventoryReference());
 			}
+			referenceTextField.getDocument().addDocumentListener(new DocumentListener() {  
+			    public void insertUpdate(DocumentEvent e) {
+			    	if (inventory != null) {
+			    		if (!inventory.getInventoryReference().equals(referenceTextField.getText())) {
+			    			 disableValidateButton();
+			    		} else {
+			    			validateButton.setEnabled(true);
+			    		}
+			    	}
+			    }  
+			    public void removeUpdate(DocumentEvent e) {  
+			    	if (inventory != null) {
+			    		if (!inventory.getInventoryReference().equals(referenceTextField.getText())) {
+			    			 disableValidateButton();
+			    		} else {
+			    			validateButton.setEnabled(true);
+			    		}
+			    	}
+			    }  
+			    public void changedUpdate(DocumentEvent e) {  
+			    	if (inventory != null) {
+			    		if (!inventory.getInventoryReference().equals(referenceTextField.getText())) {
+			    			 disableValidateButton();
+			    		} else {
+			    			validateButton.setEnabled(true);
+			    		}
+			    	}  
+			    }  
+			});  
 		}
 		return referenceTextField;
 	}
@@ -2034,5 +2090,11 @@ public class InventoryEdit extends ModalJFrame {
 		lotsDeleted.clear();
 		inventoryRowListAdded.clear();
 		lotsSaved.clear();
+	}
+	
+	private void disableValidateButton() {
+		if (validateButton.isEnabled()) {
+			validateButton.setEnabled(false);
+		}
 	}
 }
