@@ -301,7 +301,6 @@ public class InventoryEdit extends ModalJFrame {
 		} else {
 			saveButton.setVisible(true);
 			validateButton.setVisible(true);
-			confirmButton.setVisible(true);
 			deleteButton.setVisible(true);
 			codeTextField.setEditable(true);
 			resetButton.setVisible(true);
@@ -314,6 +313,11 @@ public class InventoryEdit extends ModalJFrame {
 			supplierCombo.setEnabled(true);
 			destinationCombo.setEnabled(true);
 			lotButton.setVisible(true);
+			if (inventory != null && inventory.getStatus().equals(InventoryStatus.validated.toString())) {
+				confirmButton.setEnabled(true);
+			} else {
+				confirmButton.setEnabled(false);
+			}
 		}
 	}
 
