@@ -503,7 +503,7 @@ public class InventoryEdit extends ModalJFrame {
 					newReference = referenceTextField.getText().trim();
 					boolean refExist = false;
 					refExist = medicalInventoryManager.referenceExists(newReference);
-					Boolean referenceExistonMovementStock = movStockInsertingManager.refNoExists(newReference); 
+					boolean referenceExistonMovementStock = movStockInsertingManager.refNoExists(newReference); 
 					if (refExist || referenceExistonMovementStock) {
 						MessageDialog.error(null, "angal.inventory.referencealreadyused.msg");
 						return;
@@ -581,7 +581,7 @@ public class InventoryEdit extends ModalJFrame {
 					String lastReference = inventory.getInventoryReference();
 					newReference = referenceTextField.getText().trim();
 					MedicalInventory existingInventory = medicalInventoryManager.getInventoryByReference(newReference);
-					Boolean referenceExistonMovementStock = movStockInsertingManager.refNoExists(newReference); 
+					boolean referenceExistonMovementStock = movStockInsertingManager.refNoExists(newReference); 
 					if ((existingInventory != null && existingInventory.getId() != inventory.getId()) || referenceExistonMovementStock) {
 						MessageDialog.error(null, "angal.inventory.referencealreadyused.msg");
 						return;
