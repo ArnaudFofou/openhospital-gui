@@ -1017,6 +1017,7 @@ public class InventoryEdit extends ModalJFrame {
 		});
 		return validateButton;
 	}
+	
 	private JButton getConfirmButton() {
 		confirmButton = new JButton(MessageBundle.getMessage("angal.inventory.confirm.btn"));
 		confirmButton.setMnemonic(MessageBundle.getMnemonic("angal.inventory.confirm.btn.key"));
@@ -1042,7 +1043,7 @@ public class InventoryEdit extends ModalJFrame {
 				String errorMessage = this.checkParamsValues(chargeCode, dischargeCode, supplierId, wardCode);
 				if (errorMessage != null) {
 					MessageDialog.error(null, errorMessage);
-					return ;
+					return;
 				}
 				// confirm inventory
 				try {
@@ -1124,7 +1125,7 @@ public class InventoryEdit extends ModalJFrame {
 							if (lot == null) {
 								lotButton.setEnabled(true);
 							} else {
-								BigDecimal cost = lot.getCost() != null ? lot.getCost() : new BigDecimal(0.00);
+								BigDecimal cost = lot.getCost() != null ? lot.getCost() : BigDecimal.ZERO;
 								if (lot != null) {
 									if (isLotWithCost()) {
 										if (cost.doubleValue() == 0.00 || medInvRow.isNewLot()) {
