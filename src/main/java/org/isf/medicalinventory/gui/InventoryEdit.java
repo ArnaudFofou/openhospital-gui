@@ -811,6 +811,7 @@ public class InventoryEdit extends ModalJFrame {
 				}
 				jTableInventoryRow.clearSelection();
 				adjustWidth();
+				validateButton.setEnabled(false);
 			} else {
 				return;
 			}
@@ -1334,7 +1335,7 @@ public class InventoryEdit extends ModalJFrame {
 					inventoryRowSearchList.set(r, invRow);
 					SwingUtilities.invokeLater(() -> {
 						jTableInventoryRow.updateUI();
-						disableValidateButton();
+						validateButton.setEnabled(false);
 					});
 				}
 			}
@@ -1879,10 +1880,10 @@ public class InventoryEdit extends ModalJFrame {
 			chargeCombo.addActionListener(actionEvent -> {
 				chargeType = (MovementType) chargeCombo.getSelectedItem();
 				if (inventory != null && chargeType != null && inventory.getChargeType() != null && !inventory.getChargeType().equals(chargeType.getCode())) {
-	    			 disableValidateButton();
+					validateButton.setEnabled(false);
 	    		} else {
 	    			if (inventory == null || chargeType == null) {
-	    				 disableValidateButton();
+	    				validateButton.setEnabled(false);
 	    			} else {
 	    				validateButton.setEnabled(true);	
 	    			}
@@ -1917,10 +1918,10 @@ public class InventoryEdit extends ModalJFrame {
 			dischargeCombo.addActionListener(actionEvent -> {
 				dischargeType = (MovementType) dischargeCombo.getSelectedItem();
 				if (inventory != null && dischargeType != null && inventory.getDischargeType() != null && !inventory.getDischargeType().equals(dischargeType.getCode())) {
-	    			 disableValidateButton();
+					validateButton.setEnabled(false);
 	    		} else {
 	    			if (inventory == null || dischargeType == null) {
-	    				 disableValidateButton();
+	    				validateButton.setEnabled(false);
 	    			} else {
 	    				validateButton.setEnabled(true);	
 	    			}
@@ -1953,10 +1954,10 @@ public class InventoryEdit extends ModalJFrame {
 			supplierCombo.addActionListener(actionEvent -> {
 				supplier = (Supplier) supplierCombo.getSelectedItem();
 				if (inventory != null && supplier != null && inventory.getSupplier() != supplier.getSupId()) {
-	    			 disableValidateButton();
+					validateButton.setEnabled(false);
 	    		} else {
 	    			if (inventory == null || supplier == null) {
-	    				 disableValidateButton();
+	    				validateButton.setEnabled(false);
 	    			} else {
 	    				validateButton.setEnabled(true);	
 	    			}
@@ -1989,10 +1990,10 @@ public class InventoryEdit extends ModalJFrame {
 			destinationCombo.addActionListener(actionEvent -> {
 				destination = (Ward) destinationCombo.getSelectedItem();
 				if (inventory != null && destination != null && inventory.getDestination() != null && !inventory.getDestination().equals(destination.getCode())) {
-	    			 disableValidateButton();
+					validateButton.setEnabled(false);
 	    		} else {
 	    			if (inventory == null || supplier == null) {
-	    				 disableValidateButton();
+	    				validateButton.setEnabled(false);
 	    			}  else {
 	    				validateButton.setEnabled(true);	
 	    			}
@@ -2013,7 +2014,7 @@ public class InventoryEdit extends ModalJFrame {
 			    public void insertUpdate(DocumentEvent e) {
 			    	if (inventory != null) {
 			    		if (!inventory.getInventoryReference().equals(referenceTextField.getText())) {
-			    			 disableValidateButton();
+			    			validateButton.setEnabled(false);
 			    		} else {
 			    			validateButton.setEnabled(true);
 			    		}
@@ -2022,7 +2023,7 @@ public class InventoryEdit extends ModalJFrame {
 			    public void removeUpdate(DocumentEvent e) {  
 			    	if (inventory != null) {
 			    		if (!inventory.getInventoryReference().equals(referenceTextField.getText())) {
-			    			 disableValidateButton();
+			    			validateButton.setEnabled(false);
 			    		} else {
 			    			validateButton.setEnabled(true);
 			    		}
@@ -2031,7 +2032,7 @@ public class InventoryEdit extends ModalJFrame {
 			    public void changedUpdate(DocumentEvent e) {  
 			    	if (inventory != null) {
 			    		if (!inventory.getInventoryReference().equals(referenceTextField.getText())) {
-			    			 disableValidateButton();
+			    			validateButton.setEnabled(false);
 			    		} else {
 			    			validateButton.setEnabled(true);
 			    		}
@@ -2094,11 +2095,5 @@ public class InventoryEdit extends ModalJFrame {
 		lotsDeleted.clear();
 		inventoryRowListAdded.clear();
 		lotsSaved.clear();
-	}
-	
-	private void disableValidateButton() {
-		if (validateButton.isEnabled()) {
-			validateButton.setEnabled(false);
-		}
 	}
 }
