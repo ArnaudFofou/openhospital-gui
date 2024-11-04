@@ -572,10 +572,6 @@ public class InventoryEdit extends ModalJFrame {
 					fireInventoryInserted();
 					validateButton.setEnabled(true);
 					resetVariable();
-					int info = MessageDialog.yesNo(null, "angal.inventoryrow.doyouwanttocontinueediting.msg");
-					if (info != JOptionPane.YES_OPTION) {
-						dispose();
-					}
 				} else if (mode.equals("update")) {
 					String lastCharge = inventory.getChargeType();
 					String lastDischarge = inventory.getDischargeType();
@@ -630,10 +626,7 @@ public class InventoryEdit extends ModalJFrame {
 								MessageDialog.info(null, "angal.inventory.update.success.msg");
 								resetVariable();
 								fireInventoryUpdated();
-								int info = MessageDialog.yesNo(null, "angal.inventoryrow.doyouwanttocontinueediting.msg");
-								if (info != JOptionPane.YES_OPTION) {
-									dispose();
-								}
+								validateButton.setEnabled(true);
 							} else {
 								MessageDialog.error(null, "angal.inventory.update.error.msg");
 								return;
@@ -643,10 +636,7 @@ public class InventoryEdit extends ModalJFrame {
 								MessageDialog.info(null, "angal.inventory.update.success.msg");
 								resetVariable();
 								fireInventoryUpdated();
-								int info = MessageDialog.yesNo(null, "angal.inventoryrow.doyouwanttocontinueediting.msg");
-								if (info != JOptionPane.YES_OPTION) {
-									dispose();
-								}
+								validateButton.setEnabled(true);
 							} else {
 								MessageDialog.info(null, "angal.inventory.inventoryisalreadysaved.msg");
 								return;
@@ -756,10 +746,6 @@ public class InventoryEdit extends ModalJFrame {
 					resetVariable();
 					fireInventoryUpdated();
 					validateButton.setEnabled(true);
-					int info = MessageDialog.yesNo(null, "angal.inventoryrow.doyouwanttocontinueediting.msg");
-					if (info != JOptionPane.YES_OPTION) {
-						dispose();
-					}
 				}
 			} catch (OHServiceException e) {
 				OHServiceExceptionUtil.showMessages(e);

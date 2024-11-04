@@ -487,17 +487,22 @@ public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 				@Override
 				public void valueChanged(ListSelectionEvent e) {
 					if (e.getValueIsAdjusting()) {
-						int[] selectedRows = jTableInventory.getSelectedRows();
-						if (selectedRows.length == 1) {
-							jButtonEdit.setEnabled(true);
+						int selectedRow = jTableInventory.getSelectedRow();
+						if (selectedRow == -1) {
+							MessageDialog.error(null, "angal.inventory.pleaseselectinventory.msg");
+							return;
+						} else {
+							MedicalInventory inventory = inventoryList.get(selectedRow);
+							if (inventory.getStatus().equals(InventoryStatus.canceled.toString()) || 
+											inventory.getStatus().equals(InventoryStatus.done.toString())) {
+								jButtonEdit.setEnabled(false);
+								jButtonDelete.setEnabled(false);
+							} else {
+								jButtonEdit.setEnabled(true);
+								jButtonDelete.setEnabled(true);
+							}
 							jButtonView.setEnabled(true);
 							jButtonPrint.setEnabled(true);
-							jButtonDelete.setEnabled(true);
-						} else {
-							jButtonEdit.setEnabled(false);
-							jButtonView.setEnabled(false);
-							jButtonPrint.setEnabled(false);
-							jButtonDelete.setEnabled(false);
 						}
 					}
 
