@@ -983,14 +983,7 @@ public class InventoryEdit extends ModalJFrame {
 				String wardCode = inventory.getDestination();
 				String lastReference = inventory.getInventoryReference();
 				LocalDateTime lastDate = inventory.getInventoryDate();
-				if (!lotsSaved.isEmpty() || !inventoryRowListAdded.isEmpty() || !lotsDeleted.isEmpty() || !inventoryRowsToDelete.isEmpty()
-								|| (destination != null && !destination.getCode().equals(wardCode))
-								|| (chargeType != null && !chargeType.getCode().equals(chargeCode))
-								|| (dischargeType != null && !dischargeType.getCode().equals(dischargeCode))
-								|| (supplier != null && !supplier.getSupId().equals(supplierId)) || (destination == null && wardCode != null)
-								|| (chargeType == null && chargeCode != null) || (dischargeType == null && dischargeCode != null)
-								|| (supplier == null && supplierId != null) || (lastReference != null && !lastReference.equals(newReference))
-								|| !lastDate.toLocalDate().equals(dateInventory.toLocalDate())){
+				if (checkParameters(wardCode, chargeCode, dischargeCode, supplierId, lastReference, lastDate)){
 					saveButton.doClick();
 				}
 				String errorMessage = this.checkParamsValues(chargeCode, dischargeCode, supplierId, wardCode);
