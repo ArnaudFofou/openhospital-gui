@@ -44,9 +44,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -139,6 +141,16 @@ public class MovStockMultipleCharging extends JDialog {
 	private JComboBox comboBoxUnits = new JComboBox(qtyOption);
 	private int optionSelected = UNITS;
 	private List<Lot> updateLots = new ArrayList<Lot>();
+	private final String[] lotSelectionColumnNames = {
+			MessageBundle.getMessage("angal.medicalstock.lotid").toUpperCase(),
+			MessageBundle.getMessage("angal.medicalstock.prepdate.col").toUpperCase(),
+			MessageBundle.getMessage("angal.medicalstock.duedate").toUpperCase(),
+			MessageBundle.getMessage("angal.common.quantity.txt").toUpperCase(),
+			MessageBundle.getMessage("angal.medicalstock.multiplecharging.cost").toUpperCase(),
+			MessageBundle.getMessage("angal.common.note.txt").toUpperCase()
+	};
+	private boolean[] lotSelectionColumnVisible = { true, true, true, true, GeneralData.LOTWITHCOST, true };
+	private final Class[] lotSelectionColumnClasse = { String.class, String.class, String.class, Integer.class, Double.class, String.class };
 
 	private MovStockInsertingManager movStockInsertingManager = Context.getApplicationContext().getBean(MovStockInsertingManager.class);
 	private MedicalBrowsingManager medicalBrowsingManager = Context.getApplicationContext().getBean(MedicalBrowsingManager.class);
@@ -594,16 +606,23 @@ public class MovStockMultipleCharging extends JDialog {
 
 			if (ok == JOptionPane.OK_OPTION) {
 				String lotName = lotNameTextField.getText();
-
-				if (expireDateChooser.getDate().isBefore(preparationDateChooser.getDate())) {
-					MessageDialog.error(this, "angal.medicalstock.multiplecharging.expirydatebeforepreparationdate");
-				} else if (expireDateChooser.getDate().isBefore(jDateChooser.getLocalDateTime().toLocalDate())) {
-					MessageDialog.error(this, "angal.medicalstock.multiplecharging.expiringdateinthepastnotallowed");
-				} else {
-					expiringDate = expireDateChooser.getDateEndOfDay();
-					preparationDate = preparationDateChooser.getDateStartOfDay();
-					lot = new Lot(lotName, preparationDate, expiringDate);
-					lot.setMedical(med);
+				try {
+					if (movStockInsertingManager.lotExists(lotName)) {
+						MessageDialog.error(this, "angal.medicalstock.multiplecharging.theinsertedlotcodealreaedyexists.msg");
+						continue;
+					}
+					if (expireDateChooser.getDate().isBefore(preparationDateChooser.getDate())) {
+						MessageDialog.error(this, "angal.medicalstock.multiplecharging.expirydatebeforepreparationdate");
+					} else if (expireDateChooser.getDate().isBefore(jDateChooser.getLocalDateTime().toLocalDate())) {
+						MessageDialog.error(this, "angal.medicalstock.multiplecharging.expiringdateinthepastnotallowed");
+					} else {
+						expiringDate = expireDateChooser.getDateEndOfDay();
+						preparationDate = preparationDateChooser.getDateStartOfDay();
+						lot = new Lot(lotName, preparationDate, expiringDate);
+						lot.setMedical(med);
+					}
+				} catch (OHServiceException e) {
+					OHServiceExceptionUtil.showMessages(e);
 				}
 			} else {
 				return null;
@@ -647,47 +666,70 @@ public class MovStockMultipleCharging extends JDialog {
 	protected Lot chooseLot(Medical med) {
 		List<Lot> lots;
 		try {
-			lots = movStockInsertingManager.getLotByMedical(med, true);
+			lots = movStockInsertingManager.getLotByMedical(med, false); // get also empty lots
 		} catch (OHServiceException e) {
 			lots = new ArrayList<>();
 			OHServiceExceptionUtil.showMessages(e);
 		}
-		Lot lot = null;
-		if (!lots.isEmpty()) {
-			JTable lotTable = new JTable(new StockMovModel(lots));
-			lotTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			JPanel panel = new JPanel(new BorderLayout());
-			panel.add(new JLabel(MessageBundle.getMessage("angal.medicalstock.multiplecharging.useanexistinglot")), BorderLayout.NORTH); //$NON-NLS-1$
-			panel.add(new JScrollPane(lotTable), BorderLayout.CENTER);
-			Object[] options = {
-					MessageBundle.getMessage("angal.medicalstock.multiplecharging.selectedlot"), //$NON-NLS-1$
-					MessageBundle.getMessage("angal.medicalstock.multiplecharging.newlot") }; //$NON-NLS-1$
-
-			int row;
-			do {
-				int ok = JOptionPane.showOptionDialog(this,
-					panel,
-					MessageBundle.getMessage("angal.medicalstock.multiplecharging.existinglot"), //$NON-NLS-1$
-					JOptionPane.YES_NO_OPTION,
-					JOptionPane.QUESTION_MESSAGE,
-					null,
-					options,
-					options[0]);
-
-				if (ok == JOptionPane.YES_OPTION) {
-					row = lotTable.getSelectedRow();
-					if (row != -1) {
-						lot = lots.get(row);
-					} else {
-						MessageDialog.error(this, "angal.common.pleaseselectarow.msg");
-					}
-				} else {
-					row = 0;
-				}
-
-			} while (row == -1);
+		if (lots.isEmpty()) {
+			return null;
 		}
-		return lot;
+
+		StockLotModel lotModel = new StockLotModel(lots);
+		JTable lotTable = createLotTable(lotModel);
+		JCheckBox filterZeroQuantityCheckBox = createFilterCheckbox(lotModel);
+
+		JPanel panel = new JPanel(new BorderLayout());
+		panel.add(new JLabel(MessageBundle.getMessage("angal.medicalstock.multiplecharging.useanexistinglot")), BorderLayout.NORTH);
+		panel.add(new JScrollPane(lotTable), BorderLayout.CENTER);
+		panel.add(filterZeroQuantityCheckBox, BorderLayout.SOUTH);
+
+		Lot selectedLot = null;
+		Object[] options = {
+				MessageBundle.getMessage("angal.medicalstock.multiplecharging.selectedlot"),
+				MessageBundle.getMessage("angal.medicalstock.multiplecharging.newlot")
+		};
+
+		int row;
+		do {
+			int ok = JOptionPane.showOptionDialog(this, panel,
+				MessageBundle.getMessage("angal.medicalstock.multiplecharging.existinglot"),
+				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+
+			if (ok == JOptionPane.YES_OPTION) {
+				row = lotTable.getSelectedRow();
+				if (row != -1) {
+					selectedLot = lots.get(row);
+				} else {
+					MessageDialog.error(this, "angal.common.pleaseselectarow.msg");
+				}
+			} else {
+				row = 0;
+			}
+		} while (row == -1);
+
+		return selectedLot;
+	}
+
+	private JTable createLotTable(StockLotModel lotModel) {
+		JTable lotTable = new JTable(lotModel);
+		lotTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		for (int i = 0; i < lotSelectionColumnNames.length; i++) {
+			if (!lotSelectionColumnVisible[i]) {
+				TableColumn column = lotTable.getColumnModel().getColumn(i);
+				column.setMinWidth(0);
+				column.setMaxWidth(0);
+				column.setWidth(0);
+			}
+		}
+		return lotTable;
+	}
+
+	private JCheckBox createFilterCheckbox(StockLotModel lotModel) {
+		JCheckBox filterZeroQuantityCheckBox = new JCheckBox(MessageBundle.getMessage("angal.medicalstock.multiplecharging.hideemptylots"));
+		filterZeroQuantityCheckBox.setSelected(true);
+		filterZeroQuantityCheckBox.addActionListener(e -> lotModel.setFilterZeroQuantity(filterZeroQuantityCheckBox.isSelected()));
+		return filterZeroQuantityCheckBox;
 	}
 
 	protected LocalDateTime askExpiringDate() {
@@ -1002,68 +1044,86 @@ public class MovStockMultipleCharging extends JDialog {
 		}
 	}
 
-	class StockMovModel extends DefaultTableModel {
+	class StockLotModel extends DefaultTableModel {
 
+		private static final String EMPTY = MessageBundle.getMessage("angal.medicalstock.multiplecharging.empty");
+		private static final String EXPIRED = MessageBundle.getMessage("angal.medicalstock.multiplecharging.expired");
 		private static final long serialVersionUID = 1L;
 		private List<Lot> lotList;
+		private List<Lot> displayedLots;
+		private boolean filterZeroQuantity = true;
 
-		public StockMovModel(List<Lot> lots) {
-			lotList = lots;
+		@Override
+		public Class< ? > getColumnClass(int columnIndex) {
+			return lotSelectionColumnClasse[columnIndex];
+		}
+
+		public StockLotModel(List<Lot> lots) {
+			this.lotList = new ArrayList<>(lots);
+			updateFilteredLots();
+		}
+
+		public void setFilterZeroQuantity(boolean filter) {
+			this.filterZeroQuantity = filter;
+			updateFilteredLots();
+			fireTableDataChanged();
+		}
+
+		private void updateFilteredLots() {
+			if (filterZeroQuantity) {
+				// Only include lots with quantity greater than zero
+				displayedLots = lotList.stream()
+					.filter(lot -> lot.getMainStoreQuantity() > 0)
+					.collect(Collectors.toList());
+			} else {
+				// Show all lots
+				displayedLots = new ArrayList<>(lotList);
+			}
 		}
 
 		@Override
 		public int getRowCount() {
-			if (lotList == null) {
+			if (displayedLots == null) {
 				return 0;
 			}
-			return lotList.size();
+			return displayedLots.size();
 		}
 
 		@Override
 		public String getColumnName(int c) {
-			if (c == 0) {
-				return MessageBundle.getMessage("angal.medicalstock.lotid").toUpperCase();
-			}
-			if (c == 1) {
-				return MessageBundle.getMessage("angal.medicalstock.prepdate").toUpperCase();
-			}
-			if (c == 2) {
-				return MessageBundle.getMessage("angal.medicalstock.duedate").toUpperCase();
-			}
-			if (c == 3) {
-				return MessageBundle.getMessage("angal.common.quantity.txt").toUpperCase();
-			}
-			if (GeneralData.LOTWITHCOST) {
-				if (c == 4) {
-					return MessageBundle.getMessage("angal.medicalstock.multiplecharging.cost").toUpperCase();
-				}
-			}
-			return ""; //$NON-NLS-1$
+			return lotSelectionColumnNames[c];
 		}
 
 		@Override
 		public int getColumnCount() {
-			if (GeneralData.LOTWITHCOST) {
-				return 5;
-			}
-			return 4;
+			return lotSelectionColumnNames.length;
 		}
 
 		@Override
 		public Object getValueAt(int r, int c) {
-			Lot lot = lotList.get(r);
-			if (c == -1) {
+			Lot lot = displayedLots.get(r);
+			int i = -1;
+			if (c == i) {
 				return lot;
-			} else if (c == 0) {
+			} else if (c == ++i) {
 				return lot.getCode();
-			} else if (c == 1) {
+			} else if (c == ++i) {
 				return TimeTools.formatDateTime(lot.getPreparationDate(), DATE_FORMAT_DD_MM_YYYY);
-			} else if (c == 2) {
+			} else if (c == ++i) {
 				return TimeTools.formatDateTime(lot.getDueDate(), DATE_FORMAT_DD_MM_YYYY);
-			} else if (c == 3) {
+			} else if (c == ++i) {
 				return lot.getMainStoreQuantity();
-			} else if (c == 4) {
+			} else if (c == ++i) {
 				return lot.getCost();
+			} else if (c == ++i) {
+				List<String> statuses = new ArrayList<>();
+				if (lot.getDueDate().isBefore(TimeTools.getDateToday0())) {
+					statuses.add(EXPIRED);
+				}
+				if (lot.getMainStoreQuantity() == 0) {
+					statuses.add(EMPTY);
+				}
+				return String.join(",", statuses);
 			}
 			return null;
 		}
