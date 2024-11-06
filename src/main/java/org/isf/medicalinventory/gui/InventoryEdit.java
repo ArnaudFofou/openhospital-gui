@@ -517,26 +517,10 @@ public class InventoryEdit extends ModalJFrame {
 					inventory.setStatus(state);
 					inventory.setUser(user);
 					inventory.setInventoryType(InventoryType.main.toString());
-					if (chargeType != null) {
-						inventory.setChargeType(chargeType.getCode());
-					} else {
-						inventory.setChargeType(null);
-					}
-					if (dischargeType != null) {
-						inventory.setDischargeType(dischargeType.getCode());
-					} else {
-						inventory.setDischargeType(null);
-					}
-					if (supplier != null) {
-						inventory.setSupplier(supplier.getSupId());
-					} else {
-						inventory.setSupplier(null);
-					}
-					if (destination != null) {
-						inventory.setDestination(destination.getCode());
-					} else {
-						inventory.setDestination(null);
-					}
+					inventory.setChargeType(chargeType == null ? null : chargeType.getCode());
+					inventory.setDischargeType(dischargeType == null ? null : dischargeType.getCode());
+					inventory.setSupplier(supplier == null ? null : supplier.getSupId());
+					inventory.setDestination(destination == null ? null : destination.getCode());
 					inventory = medicalInventoryManager.newMedicalInventory(inventory);
 					for (Iterator<MedicalInventoryRow> iterator = inventoryRowSearchList.iterator(); iterator.hasNext();) {
 						MedicalInventoryRow medicalInventoryRow = (MedicalInventoryRow) iterator.next();
@@ -598,29 +582,13 @@ public class InventoryEdit extends ModalJFrame {
 								inventory.setInventoryReference(newReference);
 							}
 							MovementType charge = (MovementType) chargeCombo.getSelectedItem();
-							if (charge != null) {
-								inventory.setChargeType(charge.getCode());
-							} else {
-								inventory.setChargeType(null);
-							}
 							MovementType discharge = (MovementType) dischargeCombo.getSelectedItem();
-							if (discharge != null) {
-								inventory.setDischargeType(discharge.getCode());
-							} else {
-								inventory.setDischargeType(null);
-							}
 							Supplier supplier = (Supplier) supplierCombo.getSelectedItem();
-							if (supplier != null) {
-								inventory.setSupplier(supplier.getSupId());
-							} else {
-								inventory.setSupplier(null);
-							}
 							Ward destination = (Ward) destinationCombo.getSelectedItem();
-							if (destination != null) {
-								inventory.setDestination(destination.getCode());
-							} else {
-								inventory.setDestination(null);
-							}
+							inventory.setChargeType(charge == null ? null : charge.getCode());
+							inventory.setDischargeType(discharge == null ? null : discharge.getCode());
+							inventory.setSupplier(supplier == null ? null : supplier.getSupId());
+							inventory.setDestination(destination == null ? null : destination.getCode());
 							inventory = medicalInventoryManager.updateMedicalInventory(inventory, true);
 							if (inventory != null) {
 								MessageDialog.info(null, "angal.inventory.update.success.msg");
@@ -637,11 +605,7 @@ public class InventoryEdit extends ModalJFrame {
 								resetVariable();
 								fireInventoryUpdated();
 								validateButton.setEnabled(true);
-							} else {
-								MessageDialog.info(null, "angal.inventory.inventoryisalreadysaved.msg");
-								return;
 							}
-
 						}
 						return;
 					}
