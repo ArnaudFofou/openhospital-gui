@@ -482,7 +482,7 @@ public class InventoryEdit extends ModalJFrame {
 		saveButton = new JButton(MessageBundle.getMessage("angal.common.save.btn"));
 		saveButton.setMnemonic(MessageBundle.getMnemonic("angal.common.save.btn.key"));
 		saveButton.addActionListener(actionEvent -> {
-			String state = InventoryStatus.draft.toString();
+			String status = InventoryStatus.draft.toString();
 			String user = UserBrowsingManager.getCurrentUser();
 			if (inventoryRowSearchList == null || inventoryRowSearchList.isEmpty()) {
 				MessageDialog.error(null, "angal.inventory.cannotsaveinventorywithoutproducts.msg");
@@ -514,7 +514,7 @@ public class InventoryEdit extends ModalJFrame {
 					inventory = new MedicalInventory();
 					inventory.setInventoryReference(newReference);
 					inventory.setInventoryDate(dateInventory);
-					inventory.setStatus(state);
+					inventory.setStatus(status);
 					inventory.setUser(user);
 					inventory.setInventoryType(InventoryType.main.toString());
 					inventory.setChargeType(chargeType == null ? null : chargeType.getCode());
@@ -560,6 +560,7 @@ public class InventoryEdit extends ModalJFrame {
 					String lastCharge = inventory.getChargeType();
 					String lastDischarge = inventory.getDischargeType();
 					Integer lastSupplier = inventory.getSupplier();
+					inventory.setStatus(status);
 					String lastDestination = inventory.getDestination();
 					String lastReference = inventory.getInventoryReference();
 					newReference = referenceTextField.getText().trim();
@@ -592,6 +593,8 @@ public class InventoryEdit extends ModalJFrame {
 							inventory = medicalInventoryManager.updateMedicalInventory(inventory, true);
 							if (inventory != null) {
 								MessageDialog.info(null, "angal.inventory.update.success.msg");
+								statusLabel.setText(status.toUpperCase());
+								statusLabel.setForeground(Color.GRAY);
 								resetVariable();
 								fireInventoryUpdated();
 								validateButton.setEnabled(true);
@@ -602,6 +605,8 @@ public class InventoryEdit extends ModalJFrame {
 						} else {
 							if (!inventoryRowsToDelete.isEmpty()) {
 								MessageDialog.info(null, "angal.inventory.update.success.msg");
+								statusLabel.setText(status.toUpperCase());
+								statusLabel.setForeground(Color.GRAY);
 								resetVariable();
 								fireInventoryUpdated();
 								validateButton.setEnabled(true);
@@ -707,6 +712,8 @@ public class InventoryEdit extends ModalJFrame {
 						}
 					}
 					MessageDialog.info(null, "angal.inventory.update.success.msg");
+					statusLabel.setText(status.toUpperCase());
+					statusLabel.setForeground(Color.GRAY);
 					resetVariable();
 					fireInventoryUpdated();
 					validateButton.setEnabled(true);
@@ -943,20 +950,32 @@ public class InventoryEdit extends ModalJFrame {
 				}
 				// validate inventory
 				try {
-					String status = InventoryStatus.validated.toString();
 					medicalInventoryManager.validateMedicalInventoryRow(inventory, inventoryRowSearchList);
+					String status = InventoryStatus.validated.toString();
+					inventory.setStatus(status);
+					inventory = medicalInventoryManager.updateMedicalInventory(inventory, true);
 					MessageDialog.info(null, "angal.inventory.validate.success.msg");
-					fireInventoryUpdated();
 					statusLabel.setText(status.toUpperCase());
 					statusLabel.setForeground(Color.BLUE);
 					confirmButton.setEnabled(true);
+					fireInventoryUpdated();
 				} catch (OHServiceException e) {
 					OHServiceExceptionUtil.showMessages(e);
-					try {
-						jTableInventoryRow.setModel(new InventoryRowModel());
-						adjustWidth();
-					} catch (OHServiceException e1) {
-						OHServiceExceptionUtil.showMessages(e);
+					int result = MessageDialog.yesNo(null, "angal.inventory.doyouwanttoactualizetheinventory.msg");
+					if (result == JOptionPane.YES_OPTION) {
+						try {
+							String status = InventoryStatus.validated.toString();
+							inventory.setStatus(status);
+							medicalInventoryManager.actualiseMedicalInventoryRow(inventory);
+							jTableInventoryRow.setModel(new InventoryRowModel());
+							adjustWidth();
+							statusLabel.setText(status.toUpperCase());
+							statusLabel.setForeground(Color.BLUE);
+							confirmButton.setEnabled(true);
+							fireInventoryUpdated();
+						} catch (OHServiceException e1) {
+							OHServiceExceptionUtil.showMessages(e);
+						}
 					}
 					return;
 				}
