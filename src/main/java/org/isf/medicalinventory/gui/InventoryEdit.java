@@ -571,49 +571,6 @@ public class InventoryEdit extends ModalJFrame {
 						MessageDialog.error(null, "angal.inventory.referencealreadyused.msg");
 						return;
 					}
-					if (inventoryRowListAdded.isEmpty() && lotsSaved.isEmpty() && lotsDeleted.isEmpty()) {
-						if (checkParameters(lastDestination, lastCharge, lastDischarge, lastSupplier, lastReference, lastDate)) {
-							if (!inventory.getInventoryDate().equals(dateInventory)) {
-								inventory.setInventoryDate(dateInventory);
-							}
-							if (!inventory.getUser().equals(user)) {
-								inventory.setUser(user);
-							}
-							if (!lastReference.equals(newReference)) {
-								inventory.setInventoryReference(newReference);
-							}
-							MovementType charge = (MovementType) chargeCombo.getSelectedItem();
-							MovementType discharge = (MovementType) dischargeCombo.getSelectedItem();
-							Supplier supplier = (Supplier) supplierCombo.getSelectedItem();
-							Ward destination = (Ward) destinationCombo.getSelectedItem();
-							inventory.setChargeType(charge == null ? null : charge.getCode());
-							inventory.setDischargeType(discharge == null ? null : discharge.getCode());
-							inventory.setSupplier(supplier == null ? null : supplier.getSupId());
-							inventory.setDestination(destination == null ? null : destination.getCode());
-							inventory = medicalInventoryManager.updateMedicalInventory(inventory, true);
-							if (inventory != null) {
-								MessageDialog.info(null, "angal.inventory.update.success.msg");
-								statusLabel.setText(status.toUpperCase());
-								statusLabel.setForeground(Color.GRAY);
-								resetVariable();
-								fireInventoryUpdated();
-								validateButton.setEnabled(true);
-							} else {
-								MessageDialog.error(null, "angal.inventory.update.error.msg");
-								return;
-							}
-						} else {
-							if (!inventoryRowsToDelete.isEmpty()) {
-								MessageDialog.info(null, "angal.inventory.update.success.msg");
-								statusLabel.setText(status.toUpperCase());
-								statusLabel.setForeground(Color.GRAY);
-								resetVariable();
-								fireInventoryUpdated();
-								validateButton.setEnabled(true);
-							}
-						}
-						return;
-					}
 					if (!inventory.getInventoryDate().equals(dateInventory)) {
 						inventory.setInventoryDate(dateInventory);
 					}
@@ -624,99 +581,117 @@ public class InventoryEdit extends ModalJFrame {
 						inventory.setInventoryReference(newReference);
 					}
 					MovementType charge = (MovementType) chargeCombo.getSelectedItem();
-					if (charge != null) {
-						inventory.setChargeType(charge.getCode());
-					} else {
-						inventory.setChargeType(null);
-					}
 					MovementType discharge = (MovementType) dischargeCombo.getSelectedItem();
-					if (discharge != null) {
-						inventory.setDischargeType(discharge.getCode());
-					} else {
-						inventory.setDischargeType(null);
-					}
 					Supplier supplier = (Supplier) supplierCombo.getSelectedItem();
-					if (supplier != null) {
-						inventory.setSupplier(supplier.getSupId());
-					} else {
-						inventory.setSupplier(null);
-					}
 					Ward destination = (Ward) destinationCombo.getSelectedItem();
-					if (destination != null) {
-						inventory.setDestination(destination.getCode());
-					} else {
-						inventory.setDestination(null);
-					}
-					inventory = medicalInventoryManager.updateMedicalInventory(inventory, true);
-					for (Iterator<MedicalInventoryRow> iterator = inventoryRowSearchList.iterator(); iterator.hasNext();) {
-						MedicalInventoryRow medicalInventoryRow = iterator.next();
-						Medical medical = medicalInventoryRow.getMedical();
-						Lot lot = medicalInventoryRow.getLot();
-						String lotCode;
-						medicalInventoryRow.setInventory(inventory);
-						int id = medicalInventoryRow.getId();
-						if (id == 0) {
-							if (lot != null) {
-								lotCode = lot.getCode();
-								boolean isExist = false;
-								Lot lotExist = movStockInsertingManager.getLot(lotCode);
-								if (lotExist != null) {
-									isExist = true;
-								}
-								if (!isExist) {
-									if (lot.getDueDate() != null) {
-										Lot lotStore = movStockInsertingManager.storeLot(lotCode, lot, medical);
-										medicalInventoryRow.setLot(lotStore);
-										medicalInventoryRow.setNewLot(true);
-									} else {
-										medicalInventoryRow.setLot(null);
-									}
+					inventory.setChargeType(charge == null ? null : charge.getCode());
+					inventory.setDischargeType(discharge == null ? null : discharge.getCode());
+					inventory.setSupplier(supplier == null ? null : supplier.getSupId());
+					inventory.setDestination(destination == null ? null : destination.getCode());
+					if (inventoryRowListAdded.isEmpty() && lotsSaved.isEmpty() && lotsDeleted.isEmpty()) {
+						if (checkParameters(lastDestination, lastCharge, lastDischarge, lastSupplier, lastReference, lastDate)) {
+							int response = MessageDialog.yesNo(null, "angal.inventory.doyouwanttoupdatethisinventory.msg");
+							if (response == JOptionPane.YES_OPTION) {
+								inventory = medicalInventoryManager.updateMedicalInventory(inventory, true);
+								if (inventory != null) {
+									MessageDialog.info(null, "angal.inventory.update.success.msg");
+									statusLabel.setText(status.toUpperCase());
+									statusLabel.setForeground(Color.GRAY);
+									resetVariable();
+									fireInventoryUpdated();
+									validateButton.setEnabled(true);
 								} else {
-									Lot lotStore = movStockInsertingManager.updateLot(lot);
-									medicalInventoryRow.setLot(lotStore);
+									MessageDialog.error(null, "angal.inventory.update.error.msg");
+									return;
 								}
 							}
-							medicalInventoryRowManager.newMedicalInventoryRow(medicalInventoryRow);
 						} else {
-							lot = medicalInventoryRow.getLot();
-							double reatQty = medicalInventoryRow.getRealQty();
-							medicalInventoryRow = medicalInventoryRowManager.getMedicalInventoryRowById(id);
-							medicalInventoryRow.setRealqty(reatQty);
-							if (lot != null) {
-								lotCode = lot.getCode();
-								Lot lotExist = movStockInsertingManager.getLot(lotCode);
-								if (lotExist != null) {
-									Lot lotStore;
-									lotExist.setDueDate(lot.getDueDate());
-									lotExist.setPreparationDate(lot.getPreparationDate());
-									lotExist.setCost(lot.getCost());
-									lotStore = movStockInsertingManager.updateLot(lotExist);
-									medicalInventoryRow.setLot(lotStore);
-								} else {
-									if (lot.getDueDate() != null) {
-										Lot lotStore = movStockInsertingManager.storeLot(lotCode, lot, medical);
-										medicalInventoryRow.setLot(lotStore);
-										medicalInventoryRow.setNewLot(true);
-									} else {
-										medicalInventoryRow.setLot(null);
-									}
-								}
+							if (!inventoryRowsToDelete.isEmpty()) {
+								MessageDialog.info(null, "angal.inventory.update.success.msg");
+								statusLabel.setText(status.toUpperCase());
+								statusLabel.setForeground(Color.GRAY);
+								resetVariable();
+								fireInventoryUpdated();
+								validateButton.setEnabled(true);
 							} else {
-								medicalInventoryRow.setLot(null);
-							}
-							if (medicalInventoryRow.getId() == 0) {
-								medicalInventoryRowManager.newMedicalInventoryRow(medicalInventoryRow);
-							} else {
-								medicalInventoryRowManager.updateMedicalInventoryRow(medicalInventoryRow);
+								MessageDialog.info(null, "angal.inventory.nothinghasbeenaddedonthisinventory.msg");
 							}
 						}
+						return;
 					}
-					MessageDialog.info(null, "angal.inventory.update.success.msg");
-					statusLabel.setText(status.toUpperCase());
-					statusLabel.setForeground(Color.GRAY);
-					resetVariable();
-					fireInventoryUpdated();
-					validateButton.setEnabled(true);
+					int response = MessageDialog.yesNo(null, "angal.inventory.doyouwanttoupdatethisinventory.msg");
+					if (response == JOptionPane.YES_OPTION) {
+						inventory = medicalInventoryManager.updateMedicalInventory(inventory, true);
+						for (Iterator<MedicalInventoryRow> iterator = inventoryRowSearchList.iterator(); iterator.hasNext();) {
+							MedicalInventoryRow medicalInventoryRow = iterator.next();
+							Medical medical = medicalInventoryRow.getMedical();
+							Lot lot = medicalInventoryRow.getLot();
+							String lotCode;
+							medicalInventoryRow.setInventory(inventory);
+							int id = medicalInventoryRow.getId();
+							if (id == 0) {
+								if (lot != null) {
+									lotCode = lot.getCode();
+									boolean isExist = false;
+									Lot lotExist = movStockInsertingManager.getLot(lotCode);
+									if (lotExist != null) {
+										isExist = true;
+									}
+									if (!isExist) {
+										if (lot.getDueDate() != null) {
+											Lot lotStore = movStockInsertingManager.storeLot(lotCode, lot, medical);
+											medicalInventoryRow.setLot(lotStore);
+											medicalInventoryRow.setNewLot(true);
+										} else {
+											medicalInventoryRow.setLot(null);
+										}
+									} else {
+										Lot lotStore = movStockInsertingManager.updateLot(lot);
+										medicalInventoryRow.setLot(lotStore);
+									}
+								}
+								medicalInventoryRowManager.newMedicalInventoryRow(medicalInventoryRow);
+							} else {
+								lot = medicalInventoryRow.getLot();
+								double reatQty = medicalInventoryRow.getRealQty();
+								medicalInventoryRow = medicalInventoryRowManager.getMedicalInventoryRowById(id);
+								medicalInventoryRow.setRealqty(reatQty);
+								if (lot != null) {
+									lotCode = lot.getCode();
+									Lot lotExist = movStockInsertingManager.getLot(lotCode);
+									if (lotExist != null) {
+										Lot lotStore;
+										lotExist.setDueDate(lot.getDueDate());
+										lotExist.setPreparationDate(lot.getPreparationDate());
+										lotExist.setCost(lot.getCost());
+										lotStore = movStockInsertingManager.updateLot(lotExist);
+										medicalInventoryRow.setLot(lotStore);
+									} else {
+										if (lot.getDueDate() != null) {
+											Lot lotStore = movStockInsertingManager.storeLot(lotCode, lot, medical);
+											medicalInventoryRow.setLot(lotStore);
+											medicalInventoryRow.setNewLot(true);
+										} else {
+											medicalInventoryRow.setLot(null);
+										}
+									}
+								} else {
+									medicalInventoryRow.setLot(null);
+								}
+								if (medicalInventoryRow.getId() == 0) {
+									medicalInventoryRowManager.newMedicalInventoryRow(medicalInventoryRow);
+								} else {
+									medicalInventoryRowManager.updateMedicalInventoryRow(medicalInventoryRow);
+								}
+							}
+						}
+						MessageDialog.info(null, "angal.inventory.update.success.msg");
+						statusLabel.setText(status.toUpperCase());
+						statusLabel.setForeground(Color.GRAY);
+						resetVariable();
+						fireInventoryUpdated();
+						validateButton.setEnabled(true);
+					}
 				}
 			} catch (OHServiceException e) {
 				OHServiceExceptionUtil.showMessages(e);
@@ -752,11 +727,11 @@ public class InventoryEdit extends ModalJFrame {
 					for (int i = selectedRows.length - 1; i >= 0; i--) {
 						MedicalInventoryRow inventoryRow = (MedicalInventoryRow) jTableInventoryRow.getValueAt(selectedRows[i], -1);
 						inventoryRowSearchList.remove(inventoryRow);
-						model.fireTableDataChanged();
-						jTableInventoryRow.setModel(model);
 						if (inventoryRow.getId() != 0) {
 							inventoryRowsToDelete.add(inventoryRow);
 						}
+						model.fireTableDataChanged();
+						jTableInventoryRow.setModel(model);
 					}
 				}
 				jTableInventoryRow.clearSelection();
@@ -873,13 +848,9 @@ public class InventoryEdit extends ModalJFrame {
 				int reset = MessageDialog.yesNoCancel(null, "angal.inventoryrow.doyouwanttosavethechanges.msg");
 				if (reset == JOptionPane.YES_OPTION) {
 					this.saveButton.doClick();
-				}
-				if (reset == JOptionPane.NO_OPTION) {
-					resetVariable();
-					dispose();
 				} else {
 					resetVariable();
-					return;
+					dispose();
 				}
 			} else {
 				resetVariable();
@@ -940,7 +911,8 @@ public class InventoryEdit extends ModalJFrame {
 				String wardCode = inventory.getDestination();
 				String lastReference = inventory.getInventoryReference();
 				LocalDateTime lastDate = inventory.getInventoryDate();
-				if (checkParameters(wardCode, chargeCode, dischargeCode, supplierId, lastReference, lastDate)){
+				if (checkParameters(wardCode, chargeCode, dischargeCode, supplierId, lastReference, lastDate) || !lotsSaved.isEmpty() 
+								|| !inventoryRowListAdded.isEmpty() || !inventoryRowsToDelete.isEmpty()) {
 					saveButton.doClick();
 				}
 				String errorMessage = this.checkParamsValues(chargeCode, dischargeCode, supplierId, wardCode);
