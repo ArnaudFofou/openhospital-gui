@@ -603,6 +603,13 @@ public class InventoryEdit extends ModalJFrame {
 									if (confirmButton.isEnabled()) {
 										confirmButton.setEnabled(false);
 									}
+									if (areAllMedicalsInInventory()) {
+										allRadio.setSelected(true);
+										specificRadio.setSelected(false);
+									} else {
+										specificRadio.setSelected(true);
+										allRadio.setSelected(false);
+									}
 									resetVariable();
 								} else {
 									MessageDialog.error(null, "angal.inventory.update.error.msg");
@@ -618,6 +625,13 @@ public class InventoryEdit extends ModalJFrame {
 								validateButton.setEnabled(true);
 								if (confirmButton.isEnabled()) {
 									confirmButton.setEnabled(false);
+								}
+								if (areAllMedicalsInInventory()) {
+									allRadio.setSelected(true);
+									specificRadio.setSelected(false);
+								} else {
+									specificRadio.setSelected(true);
+									allRadio.setSelected(false);
 								}
 								resetVariable();
 							} else {
@@ -698,6 +712,13 @@ public class InventoryEdit extends ModalJFrame {
 						resetVariable();
 						fireInventoryUpdated();
 						validateButton.setEnabled(true);
+						if (areAllMedicalsInInventory()) {
+							allRadio.setSelected(true);
+							specificRadio.setSelected(false);
+						} else {
+							specificRadio.setSelected(true);
+							allRadio.setSelected(false);
+						}
 					}
 				}
 			} catch (OHServiceException e) {
@@ -916,6 +937,12 @@ public class InventoryEdit extends ModalJFrame {
 				if (checkParameters(wardCode, chargeCode, dischargeCode, supplierId, lastReference, lastDate) || !lotsSaved.isEmpty() 
 								|| !inventoryRowListAdded.isEmpty() || !inventoryRowsToDelete.isEmpty()) {
 					saveButton.doClick();
+					chargeCode = inventory.getChargeType();
+					dischargeCode = inventory.getDischargeType();
+					supplierId = inventory.getSupplier();
+					wardCode = inventory.getDestination();
+					lastReference = inventory.getInventoryReference();
+					lastDate = inventory.getInventoryDate();
 				}
 				String errorMessage = this.checkParamsValues(chargeCode, dischargeCode, supplierId, wardCode);
 				if (errorMessage != null) {
@@ -1118,16 +1145,15 @@ public class InventoryEdit extends ModalJFrame {
 				for (MedicalInventoryRow invRow : inventoryRowList) {
 					addMedInRowInInventorySearchList(invRow);
 				}
-				if (areAllMedicalsInInventory()) {
-					MessageDialog.info(null, "angal.invetory.allmedicaladdedsuccessfully.msg");	
-				}
 			} else {
 				MessageDialog.info(null, "angal.inventory.youhavealreadyaddedallproduct.msg");
 			}
 			if (areAllMedicalsInInventory()) {
 				allRadio.setSelected(true);
+				specificRadio.setSelected(false);
 			} else {
 				specificRadio.setSelected(true);
+				allRadio.setSelected(false);
 			}
 		}
 
@@ -1138,7 +1164,9 @@ public class InventoryEdit extends ModalJFrame {
 			if (inventory != null) {
 				inventoryRowList = medicalInventoryRowManager.getMedicalInventoryRowByInventoryId(inventory.getId());
 			} else {
-				inventoryRowList = loadNewInventoryTable(null, inventory, false);
+				if (allRadio.isSelected()) {
+					inventoryRowList = loadNewInventoryTable(null, inventory, false);
+				}
 			}
 			if (!inventoryRowList.isEmpty()) {
 				for (MedicalInventoryRow invRow : inventoryRowList) {
@@ -1155,7 +1183,6 @@ public class InventoryEdit extends ModalJFrame {
 				specificRadio.setSelected(true);
 				allRadio.setSelected(false);
 			}
-
 		}
 
 		public Class< ? > getColumnClass(int c) {
@@ -1513,10 +1540,11 @@ public class InventoryEdit extends ModalJFrame {
 						}
 						if (inventory != null && !inventory.getStatus().equals(InventoryStatus.draft.toString())) {
 							inventory.setStatus(InventoryStatus.draft.toString());
-						}
+						}	
 						fireInventoryUpdated();
 						code = null;
 						adjustWidth();
+						MessageDialog.info(null, "angal.invetory.allmedicaladdedsuccessfully.msg");
 					} else {
 						MessageDialog.info(null, "angal.inventory.youhavealreadyaddedallproduct.msg");
 					}
