@@ -597,9 +597,12 @@ public class InventoryEdit extends ModalJFrame {
 									MessageDialog.info(null, "angal.inventory.update.success.msg");
 									statusLabel.setText(status.toUpperCase());
 									statusLabel.setForeground(Color.GRAY);
-									resetVariable();
 									fireInventoryUpdated();
 									validateButton.setEnabled(true);
+									if (confirmButton.isEnabled()) {
+										confirmButton.setEnabled(false);
+									}
+									resetVariable();
 								} else {
 									MessageDialog.error(null, "angal.inventory.update.error.msg");
 									return;
@@ -610,9 +613,12 @@ public class InventoryEdit extends ModalJFrame {
 								MessageDialog.info(null, "angal.inventory.update.success.msg");
 								statusLabel.setText(status.toUpperCase());
 								statusLabel.setForeground(Color.GRAY);
-								resetVariable();
 								fireInventoryUpdated();
 								validateButton.setEnabled(true);
+								if (confirmButton.isEnabled()) {
+									confirmButton.setEnabled(false);
+								}
+								resetVariable();
 							} else {
 								MessageDialog.info(null, "angal.inventory.nothinghasbeenaddedonthisinventory.msg");
 							}
@@ -727,9 +733,7 @@ public class InventoryEdit extends ModalJFrame {
 					for (int i = selectedRows.length - 1; i >= 0; i--) {
 						MedicalInventoryRow inventoryRow = (MedicalInventoryRow) jTableInventoryRow.getValueAt(selectedRows[i], -1);
 						inventoryRowSearchList.remove(inventoryRow);
-						if (inventoryRow.getId() != 0) {
-							inventoryRowsToDelete.add(inventoryRow);
-						}
+						inventoryRowsToDelete.add(inventoryRow);
 						model.fireTableDataChanged();
 						jTableInventoryRow.setModel(model);
 					}
@@ -868,9 +872,7 @@ public class InventoryEdit extends ModalJFrame {
 			if (reset == JOptionPane.YES_OPTION) {
 				if (inventory != null) {
 					for (MedicalInventoryRow invRow : inventoryRowSearchList) {
-						if (invRow.getId() != 0) {
-							inventoryRowsToDelete.add(invRow);
-						}
+						inventoryRowsToDelete.add(invRow);
 					}
 				}
 				selectAll = false;
