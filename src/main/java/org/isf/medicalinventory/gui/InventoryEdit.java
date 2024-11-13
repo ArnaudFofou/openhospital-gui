@@ -934,17 +934,16 @@ public class InventoryEdit extends ModalJFrame {
 							String status = InventoryStatus.validated.toString();
 							inventory.setStatus(status);
 							medicalInventoryManager.actualizeMedicalInventoryRow(inventory);
-							adjustWidth();
 							statusLabel.setText(status.toUpperCase());
 							statusLabel.setForeground(Color.BLUE);
 							confirmButton.setEnabled(true);
 							jTableInventoryRow.setModel(new InventoryRowModel());
 							fireInventoryUpdated();
+							adjustWidth();
 						} catch (OHServiceException e1) {
 							OHServiceExceptionUtil.showMessages(e);
 						}
 					}
-					return;
 				}
 			}
 		});
