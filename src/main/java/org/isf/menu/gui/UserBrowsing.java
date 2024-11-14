@@ -258,7 +258,7 @@ public class UserBrowsing extends ModalJFrame implements UserListener {
 				newPassword2 = null;
 				user.setPasswd(hashed);
 				try {
-					if (userBrowsingManager.updatePassword(user)) {
+					if (userBrowsingManager.updatePassword(user) != null) {
 						MessageDialog.info(this, "angal.userbrowser.thepasswordhasbeenchanged.msg");
 					}
 				} catch (OHServiceException e) {
