@@ -492,8 +492,7 @@ public class InventoryEdit extends ModalJFrame {
 			try {
 				if (!lotsDeleted.isEmpty() || !inventoryRowsToDelete.isEmpty()) {
 					for (Map.Entry<Integer, Lot> entry : lotsDeleted.entrySet()) {
-						MedicalInventoryRow invRow = null;
-						invRow = medicalInventoryRowManager.getMedicalInventoryRowById(entry.getKey());
+						MedicalInventoryRow invRow = medicalInventoryRowManager.getMedicalInventoryRowById(entry.getKey());
 						if (invRow != null) {
 							invRow.setLot(null);
 							medicalInventoryRowManager.updateMedicalInventoryRow(invRow);
@@ -524,7 +523,7 @@ public class InventoryEdit extends ModalJFrame {
 					inventory.setDestination(destination == null ? null : destination.getCode());
 					inventory = medicalInventoryManager.newMedicalInventory(inventory);
 					for (Iterator<MedicalInventoryRow> iterator = inventoryRowSearchList.iterator(); iterator.hasNext();) {
-						MedicalInventoryRow medicalInventoryRow = (MedicalInventoryRow) iterator.next();
+						MedicalInventoryRow medicalInventoryRow = iterator.next();
 						medicalInventoryRow.setInventory(inventory);
 						Lot lot = medicalInventoryRow.getLot();
 						String lotCode;
@@ -656,12 +655,24 @@ public class InventoryEdit extends ModalJFrame {
 								lotCode = lot.getCode();
 								Lot lotExist = movStockInsertingManager.getLot(lotCode);
 								if (lotExist != null) {
+									lot.setMedical(medical);
 									lot = movStockInsertingManager.updateLot(lot);
 									medicalInventoryRow.setLot(lot);
 								} else {
-									Lot newLot = movStockInsertingManager.storeLot(lotCode, lot, medical);
-									medicalInventoryRow.setLot(newLot);
-									medicalInventoryRow.setNewLot(true);
+									int idInvRow = medicalInventoryRow.getId();
+									MedicalInventoryRow invRow = medicalInventoryRowManager.getMedicalInventoryRowById(idInvRow);
+									if (invRow.getLock() != medicalInventoryRow.getLock()) {
+										Lot newLot = movStockInsertingManager.storeLot(lotCode, lot, medical);
+										invRow.setLot(newLot);
+										invRow.setNewLot(true);
+										invRow.setRealqty(medicalInventoryRow.getRealQty());
+										medicalInventoryRow = invRow;
+									} else {
+										Lot newLot = movStockInsertingManager.storeLot(lotCode, lot, medical);
+										medicalInventoryRow.setLot(newLot);
+										medicalInventoryRow.setNewLot(true);
+									}
+									
 								}
 							}
 							medicalInventoryRow.setInventory(inventory);
@@ -671,6 +682,7 @@ public class InventoryEdit extends ModalJFrame {
 							} else {
 								medicalInventoryRowManager.updateMedicalInventoryRow(medicalInventoryRow);
 							}
+							new InventoryEdit(inventory, "update");
 						}
 						MessageDialog.info(null, "angal.inventory.update.success.msg");
 						statusLabel.setText(status.toUpperCase());
@@ -687,6 +699,8 @@ public class InventoryEdit extends ModalJFrame {
 						}
 					}
 				}
+				inventoryRowSearchList = medicalInventoryRowManager.getMedicalInventoryRowByInventoryId(inventory.getId());
+				jTableInventoryRow.updateUI();
 			} catch (OHServiceException e) {
 				OHServiceExceptionUtil.showMessages(e);
 				return;
@@ -858,10 +872,17 @@ public class InventoryEdit extends ModalJFrame {
 		resetButton.addActionListener(actionEvent -> {
 			int reset = MessageDialog.yesNo(null, "angal.inventoryrow.doyoureallywanttocleanthistable.msg");
 			if (reset == JOptionPane.YES_OPTION) {
-				if (inventory != null) {
-					for (MedicalInventoryRow invRow : inventoryRowSearchList) {
-						inventoryRowsToDelete.add(invRow);
+				try {
+					if (inventory != null) {
+						List<MedicalInventoryRow> invRows = medicalInventoryRowManager.getMedicalInventoryRowByInventoryId(inventory.getId());
+						medicalInventoryRowManager.deleteMedicalInventoryRows(invRows);
+						inventoryRowSearchList.clear();
+					} else {
+						inventoryRowSearchList.clear();
 					}
+					
+				} catch (OHServiceException e) {
+					OHServiceExceptionUtil.showMessages(e);
 				}
 				specificRadio.setSelected(true);
 				codeTextField.setEnabled(true);
@@ -1069,8 +1090,6 @@ public class InventoryEdit extends ModalJFrame {
 										}
 									}
 
-								} else {
-									lotButton.setEnabled(false);
 								}
 							}
 						} else {
@@ -1600,7 +1619,7 @@ public class InventoryEdit extends ModalJFrame {
 			medicalList = medicalBrowsingManager.getMedicals();
 		}
 		for (Iterator<Medical> iterator = medicalList.iterator(); iterator.hasNext();) {
-			Medical med = (Medical) iterator.next();
+			Medical med = iterator.next();
 			lots = movStockInsertingManager.getLotByMedical(med, false);
 			double actualQty = med.getInqty() - med.getOutqty();
 			if (lots.size() == 0) {
@@ -1610,7 +1629,7 @@ public class InventoryEdit extends ModalJFrame {
 				}
 			} else {
 				for (Iterator<Lot> iterator2 = lots.iterator(); iterator2.hasNext();) {
-					Lot lot = (Lot) iterator2.next();
+					Lot lot = iterator2.next();
 					inventoryRowTemp = new MedicalInventoryRow(0, lot.getMainStoreQuantity(), lot.getMainStoreQuantity(), null, med, lot);
 					if (!existInInventorySearchList(inventoryRowTemp)) {
 						inventoryRowsList.add(inventoryRowTemp);
@@ -1642,7 +1661,7 @@ public class InventoryEdit extends ModalJFrame {
 		int numberOfMedicalWithoutSameLotAdded = 0;
 		Medical medicalWithLot = null;
 		for (Iterator<Medical> iterator = medicalList.iterator(); iterator.hasNext();) {
-			Medical med = (Medical) iterator.next();
+			Medical med = iterator.next();
 			lots = movStockInsertingManager.getLotByMedical(med, false);
 			if (lots.size() == 0) {
 				inventoryRowTemp = new MedicalInventoryRow(0, 0.0, 0.0, null, med, null);
@@ -1657,7 +1676,7 @@ public class InventoryEdit extends ModalJFrame {
 			} else {
 				medicalWithLot = med;
 				for (Iterator<Lot> iterator2 = lots.iterator(); iterator2.hasNext();) {
-					Lot lot = (Lot) iterator2.next();
+					Lot lot = iterator2.next();
 					inventoryRowTemp = new MedicalInventoryRow(0, lot.getMainStoreQuantity(), lot.getMainStoreQuantity(), null, med, lot);
 					if (!existInInventorySearchList(inventoryRowTemp)) {
 						inventoryRowsList.add(inventoryRowTemp);
