@@ -46,8 +46,8 @@ import java.util.Collections;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -502,6 +502,8 @@ public class InventoryEdit extends ModalJFrame {
 					}
 					medicalInventoryRowManager.deleteMedicalInventoryRows(inventoryRowsToDelete);
 				}
+				ListIterator<MedicalInventoryRow> inventoryRowSearchListIterator = inventoryRowSearchList.listIterator();
+				List<MedicalInventoryRow> newMedicalInventoryRows = new ArrayList<>();
 				if (mode.equals("new")) {
 					newReference = referenceTextField.getText().trim();
 					boolean refExist = false;
@@ -522,8 +524,8 @@ public class InventoryEdit extends ModalJFrame {
 					inventory.setSupplier(supplier == null ? null : supplier.getSupId());
 					inventory.setDestination(destination == null ? null : destination.getCode());
 					inventory = medicalInventoryManager.newMedicalInventory(inventory);
-					for (Iterator<MedicalInventoryRow> iterator = inventoryRowSearchList.iterator(); iterator.hasNext();) {
-						MedicalInventoryRow medicalInventoryRow = iterator.next();
+					while (inventoryRowSearchListIterator.hasNext()) {
+						MedicalInventoryRow medicalInventoryRow = inventoryRowSearchListIterator.next();
 						medicalInventoryRow.setInventory(inventory);
 						Lot lot = medicalInventoryRow.getLot();
 						String lotCode;
@@ -549,7 +551,8 @@ public class InventoryEdit extends ModalJFrame {
 						} else {
 							medicalInventoryRow.setLot(null);
 						}
-						medicalInventoryRowManager.newMedicalInventoryRow(medicalInventoryRow);
+						medicalInventoryRow = medicalInventoryRowManager.newMedicalInventoryRow(medicalInventoryRow);
+						newMedicalInventoryRows.add(medicalInventoryRow);
 					}
 					mode = "update";
 					MessageDialog.info(this, "angal.inventory.savesuccess.msg");
@@ -646,8 +649,8 @@ public class InventoryEdit extends ModalJFrame {
 					int response = MessageDialog.yesNo(null, "angal.inventory.doyouwanttoupdatethisinventory.msg");
 					if (response == JOptionPane.YES_OPTION) {
 						inventory = medicalInventoryManager.updateMedicalInventory(inventory, true);
-						for (Iterator<MedicalInventoryRow> iterator = inventoryRowSearchList.iterator(); iterator.hasNext();) {
-							MedicalInventoryRow medicalInventoryRow = iterator.next();
+						while (inventoryRowSearchListIterator.hasNext()) {
+							MedicalInventoryRow medicalInventoryRow = inventoryRowSearchListIterator.next();
 							Medical medical = medicalInventoryRow.getMedical();
 							Lot lot = medicalInventoryRow.getLot();
 							String lotCode;
@@ -678,11 +681,11 @@ public class InventoryEdit extends ModalJFrame {
 							medicalInventoryRow.setInventory(inventory);
 							int id = medicalInventoryRow.getId();
 							if (id == 0) {
-								medicalInventoryRowManager.newMedicalInventoryRow(medicalInventoryRow);
+								medicalInventoryRow =medicalInventoryRowManager.newMedicalInventoryRow(medicalInventoryRow);
 							} else {
-								medicalInventoryRowManager.updateMedicalInventoryRow(medicalInventoryRow);
+								medicalInventoryRow = medicalInventoryRowManager.updateMedicalInventoryRow(medicalInventoryRow);
 							}
-							new InventoryEdit(inventory, "update");
+							newMedicalInventoryRows.add(medicalInventoryRow);
 						}
 						MessageDialog.info(null, "angal.inventory.update.success.msg");
 						statusLabel.setText(status.toUpperCase());
@@ -699,7 +702,7 @@ public class InventoryEdit extends ModalJFrame {
 						}
 					}
 				}
-				inventoryRowSearchList = medicalInventoryRowManager.getMedicalInventoryRowByInventoryId(inventory.getId());
+				inventoryRowSearchList = newMedicalInventoryRows;
 				jTableInventoryRow.updateUI();
 			} catch (OHServiceException e) {
 				OHServiceExceptionUtil.showMessages(e);
@@ -1618,8 +1621,9 @@ public class InventoryEdit extends ModalJFrame {
 		} else {
 			medicalList = medicalBrowsingManager.getMedicals();
 		}
-		for (Iterator<Medical> iterator = medicalList.iterator(); iterator.hasNext();) {
-			Medical med = iterator.next();
+		ListIterator<Medical> medicalListIterator = medicalList.listIterator();
+		while (medicalListIterator.hasNext()) {
+			Medical med = medicalListIterator.next();
 			lots = movStockInsertingManager.getLotByMedical(med, false);
 			double actualQty = med.getInqty() - med.getOutqty();
 			if (lots.size() == 0) {
@@ -1628,8 +1632,9 @@ public class InventoryEdit extends ModalJFrame {
 					inventoryRowsList.add(inventoryRowTemp);
 				}
 			} else {
-				for (Iterator<Lot> iterator2 = lots.iterator(); iterator2.hasNext();) {
-					Lot lot = iterator2.next();
+				ListIterator<Lot> lotListIterator = lots.listIterator();
+				while (lotListIterator.hasNext()) {
+					Lot lot = lotListIterator.next();
 					inventoryRowTemp = new MedicalInventoryRow(0, lot.getMainStoreQuantity(), lot.getMainStoreQuantity(), null, med, lot);
 					if (!existInInventorySearchList(inventoryRowTemp)) {
 						inventoryRowsList.add(inventoryRowTemp);
@@ -1660,8 +1665,9 @@ public class InventoryEdit extends ModalJFrame {
 		}
 		int numberOfMedicalWithoutSameLotAdded = 0;
 		Medical medicalWithLot = null;
-		for (Iterator<Medical> iterator = medicalList.iterator(); iterator.hasNext();) {
-			Medical med = iterator.next();
+		ListIterator<Medical> medicalListIterator = medicalList.listIterator();
+		while (medicalListIterator.hasNext()) {
+			Medical med = medicalListIterator.next();
 			lots = movStockInsertingManager.getLotByMedical(med, false);
 			if (lots.size() == 0) {
 				inventoryRowTemp = new MedicalInventoryRow(0, 0.0, 0.0, null, med, null);
@@ -1675,8 +1681,9 @@ public class InventoryEdit extends ModalJFrame {
 				}
 			} else {
 				medicalWithLot = med;
-				for (Iterator<Lot> iterator2 = lots.iterator(); iterator2.hasNext();) {
-					Lot lot = iterator2.next();
+				ListIterator<Lot> lotListIterator = lots.listIterator();
+				while (lotListIterator.hasNext()) {
+					Lot lot = lotListIterator.next();
 					inventoryRowTemp = new MedicalInventoryRow(0, lot.getMainStoreQuantity(), lot.getMainStoreQuantity(), null, med, lot);
 					if (!existInInventorySearchList(inventoryRowTemp)) {
 						inventoryRowsList.add(inventoryRowTemp);
