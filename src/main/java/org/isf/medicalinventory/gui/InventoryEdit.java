@@ -769,7 +769,7 @@ public class InventoryEdit extends ModalJFrame {
 					BigDecimal cost = BigDecimal.ZERO;
 					if (isLotWithCost()) {
 						cost = askCost(2, cost);
-						if (cost.compareTo(new BigDecimal(0)) == 0) {
+						if (cost.compareTo(BigDecimal.ZERO) == 0) {
 							return;
 						}
 					}
