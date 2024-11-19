@@ -766,7 +766,7 @@ public class InventoryEdit extends ModalJFrame {
 			Lot lot = new Lot();
 			try {
 				if (lotToUpdate != null && !selectedInventoryRow.isNewLot()) {
-					BigDecimal cost = new BigDecimal(0);
+					BigDecimal cost = BigDecimal.ZERO;
 					if (isLotWithCost()) {
 						cost = askCost(2, cost);
 						if (cost.compareTo(new BigDecimal(0)) == 0) {
