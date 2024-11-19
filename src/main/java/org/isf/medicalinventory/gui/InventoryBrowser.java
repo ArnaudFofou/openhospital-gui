@@ -493,9 +493,7 @@ public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 								
 							}
 							jButtonView.setEnabled(true);
-							jButtonPrint.setEnabled(true);
 							jButtonView.setEnabled(true);
-							jButtonPrint.setEnabled(true);
 							jButtonDelete.setEnabled(true);
 						} else {
 							jButtonEdit.setEnabled(false);
