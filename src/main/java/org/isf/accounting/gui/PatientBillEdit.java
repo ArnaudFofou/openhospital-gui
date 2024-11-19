@@ -821,6 +821,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener {
 			jPanelDate.add(getJCalendarDate());
 			jPanelDate.add(getJButtonPickPatient());
 			jPanelDate.add(getJButtonTrashPatient());
+			
 			if (!GeneralData.getGeneralData().getSINGLEUSER()) {
 				jPanelDate.add(getJLabelUser());
 			}
@@ -846,18 +847,20 @@ public class PatientBillEdit extends JDialog implements SelectionListener {
 			jButtonTrashPatient.setIcon(new ImageIcon("rsc/icons/remove_patient_button.png"));
 			jButtonTrashPatient.setToolTipText(MessageBundle.getMessage("angal.newbill.removethepatientassociatedwiththisbill.tooltip"));
 			jButtonTrashPatient.addActionListener(actionEvent -> {
-				// BILL
-				thisBill.setBillPatient(null);
-				thisBill.setIsPatient(false);
-				thisBill.getBillPatient().setCode(0);
-				thisBill.setPatName(""); //$NON-NLS-1$
-				thisBill.setAdmission(null);
-				// INTERFACE
-				jTextFieldPatient.setText("");
-				jTextFieldPatient.setEditable(false);
-				jButtonPickPatient.setText(MessageBundle.getMessage("angal.newbill.findpatient.btn"));
-				jButtonPickPatient.setToolTipText(MessageBundle.getMessage("angal.newbill.associateapatientwiththisbill.tooltip"));
-				jButtonTrashPatient.setEnabled(false);
+				if (thisBill.getBillPatient() != null) {
+					// BILL
+					thisBill.setBillPatient(null);
+					thisBill.setIsPatient(false);
+					thisBill.setPatName(""); //$NON-NLS-1$
+					thisBill.setAdmission(null);
+					// INTERFACE
+					jTextFieldPatient.setText("");
+					jTextFieldPatient.setEditable(false);
+					jButtonPickPatient.setText(MessageBundle.getMessage("angal.newbill.findpatient.btn"));
+					jButtonPickPatient.setToolTipText(MessageBundle.getMessage("angal.newbill.associateapatientwiththisbill.tooltip"));
+				} else {
+					MessageDialog.info(null, MessageBundle.getMessage("angal.newbill.pleasefindpatientbeforeremotehim.msg"));
+				}
 			});
 		}
 		return jButtonTrashPatient;
