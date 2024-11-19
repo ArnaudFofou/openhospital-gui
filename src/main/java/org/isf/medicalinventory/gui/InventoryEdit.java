@@ -681,7 +681,7 @@ public class InventoryEdit extends ModalJFrame {
 							medicalInventoryRow.setInventory(inventory);
 							int id = medicalInventoryRow.getId();
 							if (id == 0) {
-								medicalInventoryRow =medicalInventoryRowManager.newMedicalInventoryRow(medicalInventoryRow);
+								medicalInventoryRow = medicalInventoryRowManager.newMedicalInventoryRow(medicalInventoryRow);
 							} else {
 								medicalInventoryRow = medicalInventoryRowManager.updateMedicalInventoryRow(medicalInventoryRow);
 							}
