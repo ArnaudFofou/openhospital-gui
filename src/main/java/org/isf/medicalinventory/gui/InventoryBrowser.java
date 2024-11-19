@@ -72,9 +72,6 @@ import org.springframework.data.domain.Page;
 
 public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private GoodDateChooser jCalendarTo;
 	private GoodDateChooser jCalendarFrom;
