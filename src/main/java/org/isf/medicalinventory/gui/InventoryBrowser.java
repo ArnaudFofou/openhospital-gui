@@ -85,7 +85,6 @@ public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 	private JButton jButtonClose;
 	private JButton jButtonNew;
 	private JButton jButtonEdit;
-	private JButton jButtonPrint;
 	private JButton jButtonDelete;
 	private JButton jButtonView;
 	private JScrollPane scrollPaneInventory;
@@ -99,7 +98,7 @@ public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 	private JLabel statusLabel;
 	JButton next;
 	JButton previous;
-	JComboBox<Integer> pagesCombo = new JComboBox<Integer>();
+	JComboBox<Integer> pagesCombo = new JComboBox<>();
 	JLabel under = new JLabel("/ 0 Page");
 	private static int PAGE_SIZE = 50;
 	private int startIndex = 0;
@@ -268,7 +267,6 @@ public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 			panelFooter.add(getNewButton());
 			panelFooter.add(getUpdateButton());
 			panelFooter.add(getViewButton());
-			panelFooter.add(getPrintButton());
 			panelFooter.add(getDeleteButton());
 			panelFooter.add(getCloseButton());
 		}
@@ -416,13 +414,6 @@ public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 		});
 		return jButtonView;
 	}
-	
-	private JButton getPrintButton() {
-		jButtonPrint = new JButton(MessageBundle.getMessage("angal.common.print.btn"));
-		jButtonPrint.setMnemonic(MessageBundle.getMnemonic("angal.common.print.btn.key"));
-		jButtonPrint.setEnabled(false);
-		return jButtonPrint;
-	}
 
 	private JButton getDeleteButton() {
 		jButtonDelete = new JButton(MessageBundle.getMessage("angal.common.delete.btn"));
@@ -505,10 +496,10 @@ public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 							jButtonPrint.setEnabled(true);
 							jButtonView.setEnabled(true);
 							jButtonPrint.setEnabled(true);
+							jButtonDelete.setEnabled(true);
 						} else {
 							jButtonEdit.setEnabled(false);
 							jButtonView.setEnabled(false);
-							jButtonPrint.setEnabled(false);
 							jButtonDelete.setEnabled(false);
 						}
 					}
