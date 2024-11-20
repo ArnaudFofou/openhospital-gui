@@ -846,21 +846,21 @@ public class PatientBillEdit extends JDialog implements SelectionListener {
 			jButtonTrashPatient.setPreferredSize(new Dimension(25, 25));
 			jButtonTrashPatient.setIcon(new ImageIcon("rsc/icons/remove_patient_button.png"));
 			jButtonTrashPatient.setToolTipText(MessageBundle.getMessage("angal.newbill.removethepatientassociatedwiththisbill.tooltip"));
+			if (thisBill.getBillPatient() == null) {
+				jButtonTrashPatient.setEnabled(false);
+			}
 			jButtonTrashPatient.addActionListener(actionEvent -> {
-				if (thisBill.getBillPatient() != null) {
-					// BILL
-					thisBill.setBillPatient(null);
-					thisBill.setIsPatient(false);
-					thisBill.setPatName(""); //$NON-NLS-1$
-					thisBill.setAdmission(null);
-					// INTERFACE
-					jTextFieldPatient.setText("");
-					jTextFieldPatient.setEditable(false);
-					jButtonPickPatient.setText(MessageBundle.getMessage("angal.newbill.findpatient.btn"));
-					jButtonPickPatient.setToolTipText(MessageBundle.getMessage("angal.newbill.associateapatientwiththisbill.tooltip"));
-				} else {
-					MessageDialog.info(null, MessageBundle.getMessage("angal.newbill.pleasefindpatientbeforeremotehim.msg"));
-				}
+				// BILL
+				thisBill.setBillPatient(null);
+				thisBill.setIsPatient(false);
+				thisBill.setPatName(""); //$NON-NLS-1$
+				thisBill.setAdmission(null);
+				// INTERFACE
+				jTextFieldPatient.setText("");
+				jTextFieldPatient.setEditable(false);
+				jButtonPickPatient.setText(MessageBundle.getMessage("angal.newbill.findpatient.btn"));
+				jButtonPickPatient.setToolTipText(MessageBundle.getMessage("angal.newbill.associateapatientwiththisbill.tooltip"));
+				jButtonTrashPatient.setEnabled(false);
 			});
 		}
 		return jButtonTrashPatient;
@@ -898,6 +898,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener {
 			jButtonPickPatient.setText(MessageBundle.getMessage("angal.newbill.changepatient.btn"));
 			jButtonPickPatient.setMnemonic(MessageBundle.getMnemonic("angal.newbill.changepatient.btn.key"));
 			jButtonPickPatient.setToolTipText(MessageBundle.getMessage("angal.newbill.changethepatientassociatedwiththisbill.tooltip"));
+			jButtonTrashPatient.setEnabled(true);
 		}
 	}
 
