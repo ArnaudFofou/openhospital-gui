@@ -897,7 +897,9 @@ public class PatientBillEdit extends JDialog implements SelectionListener {
 			jButtonPickPatient.setText(MessageBundle.getMessage("angal.newbill.changepatient.btn"));
 			jButtonPickPatient.setMnemonic(MessageBundle.getMnemonic("angal.newbill.changepatient.btn.key"));
 			jButtonPickPatient.setToolTipText(MessageBundle.getMessage("angal.newbill.changethepatientassociatedwiththisbill.tooltip"));
-			jButtonTrashPatient.setEnabled(true);
+			if (jButtonTrashPatient != null) {
+				jButtonTrashPatient.setEnabled(true);	
+			}
 		}
 	}
 
