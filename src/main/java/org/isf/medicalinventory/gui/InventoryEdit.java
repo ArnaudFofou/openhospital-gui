@@ -71,6 +71,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.EventListenerList;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -223,6 +225,7 @@ public class InventoryEdit extends ModalJFrame {
 	private Supplier supplier = null;
 	private Ward destination = null;
 	private String newReference = null;
+	List<Medical> medicals = new ArrayList<>();
 	private MedicalInventoryManager medicalInventoryManager = Context.getApplicationContext().getBean(MedicalInventoryManager.class);
 	private MedicalInventoryRowManager medicalInventoryRowManager = Context.getApplicationContext().getBean(MedicalInventoryRowManager.class);
 	private MedicalBrowsingManager medicalBrowsingManager = Context.getApplicationContext().getBean(MedicalBrowsingManager.class);
@@ -253,6 +256,11 @@ public class InventoryEdit extends ModalJFrame {
 	private void initComponents() {
 		inventoryRowList = new ArrayList<>();
 		inventoryRowSearchList = new ArrayList<>();
+		try {
+			medicals = medicalBrowsingManager.getMedicals();
+		} catch (OHServiceException e) {
+			OHServiceExceptionUtil.showMessages(e);
+		}
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		setMinimumSize(new Dimension(1000, 600));
 		setLocationRelativeTo(null);
@@ -1129,10 +1137,24 @@ public class InventoryEdit extends ModalJFrame {
 			jTableInventoryRow.setDefaultEditor(Integer.class, cellEditor);
 			TableRowSorter<TableModel> sorter = new TableRowSorter<>(model);  
 			jTableInventoryRow.setRowSorter(sorter);
+			model.addTableModelListener(new TableModelListener() {
+				@Override
+				public void tableChanged(TableModelEvent e) {
+	                updateListFromModel();
+				}
+	        });
 		}
 		return jTableInventoryRow;
 	}
 
+	private void updateListFromModel() {
+	    for (int i = 0; i < model.getRowCount(); i++) {
+	    	jTableInventoryRow.convertRowIndexToView(i);
+	    }
+	    for (int i = 0; i < model.getColumnCount(); i++) {
+	    	jTableInventoryRow.convertColumnIndexToView(i);
+	    }
+	}
 	class EnabledTableCellRenderer extends DefaultTableCellRenderer {
 
 		private static final long serialVersionUID = 1L;
@@ -2028,7 +2050,6 @@ public class InventoryEdit extends ModalJFrame {
 	}
 	
 	private  boolean areAllMedicalsInInventory() throws OHServiceException {
-		List<Medical> medicals = medicalBrowsingManager.getMedicals();
 		Set<Medical> inventorySet = new HashSet<>();
 		for (MedicalInventoryRow row : inventoryRowSearchList) {
 			inventorySet.add(row.getMedical());
