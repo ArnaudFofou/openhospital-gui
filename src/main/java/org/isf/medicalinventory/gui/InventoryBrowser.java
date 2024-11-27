@@ -602,8 +602,9 @@ public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 		if (statusComboBox == null) {
 			statusComboBox = new JComboBox<String>();
 			statusComboBox.addItem("");
-			for (InventoryStatus currentStatus : InventoryStatus.values()) {
-				statusComboBox.addItem(MessageBundle.getMessage("angal.inventory." + currentStatus));
+			List<String> statusList = medicalInventoryManager.getStatusList();
+			for (String status : statusList) {
+				statusComboBox.addItem(MessageBundle.getMessage(status));
 			}
 			statusComboBox.addActionListener(actionEvent -> {
 				InventoryBrowsingModel inventoryModel = new InventoryBrowsingModel();

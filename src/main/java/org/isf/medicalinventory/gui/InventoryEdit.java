@@ -1784,11 +1784,13 @@ public class InventoryEdit extends ModalJFrame {
 		if (statusLabel == null) {
 			if (inventory == null) {
 				String currentStatus = InventoryStatus.draft.toString().toUpperCase();
-				statusLabel = new JLabel(currentStatus);
+				String status = medicalInventoryManager.getStatusByKey(currentStatus);
+				statusLabel = new JLabel(MessageBundle.getMessage(status));
 				statusLabel.setForeground(Color.GRAY);
 			} else {
 				String currentStatus = inventory.getStatus().toUpperCase();
-				statusLabel = new JLabel(currentStatus);
+				String status = medicalInventoryManager.getStatusByKey(currentStatus);
+				statusLabel = new JLabel(MessageBundle.getMessage(status));
 				if (currentStatus.equalsIgnoreCase(InventoryStatus.draft.toString())) {
 					statusLabel.setForeground(Color.GRAY);
 				}
