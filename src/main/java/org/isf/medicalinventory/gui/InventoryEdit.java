@@ -987,7 +987,7 @@ public class InventoryEdit extends ModalJFrame {
 							fireInventoryUpdated();
 							adjustWidth();
 						} catch (OHServiceException e1) {
-							OHServiceExceptionUtil.showMessages(e);
+							OHServiceExceptionUtil.showMessages(e1);
 						}
 					}
 				}
