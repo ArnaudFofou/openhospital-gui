@@ -639,6 +639,7 @@ public class InventoryWardEdit extends ModalJFrame {
 					MessageDialog.info(null, "angal.inventory.validate.success.msg");
 					statusLabel.setText(status.toUpperCase());
 					statusLabel.setForeground(Color.BLUE);
+					confirmButton.setEnabled(true);
 					fireInventoryUpdated();
 				} catch (OHServiceException e) {
 					OHServiceExceptionUtil.showMessages(e);
