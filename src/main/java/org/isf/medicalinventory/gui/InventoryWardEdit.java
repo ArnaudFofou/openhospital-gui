@@ -162,7 +162,7 @@ public class InventoryWardEdit extends ModalJFrame {
 	private JButton deleteButton;
 	private JScrollPane scrollPaneInventory;
 	private JTable jTableInventoryRow;
-
+	private JButton confirmButton;
 	private List<MedicalInventoryRow> inventoryRowList = new ArrayList<>();
 	private List<MedicalInventoryRow> inventoryRowSearchList = new ArrayList<>();
 	private List<MedicalInventoryRow> inventoryRowsToDelete = new ArrayList<>();
@@ -270,6 +270,7 @@ public class InventoryWardEdit extends ModalJFrame {
 			validateButton.setVisible(false);
 			printButton.setVisible(true);
 			lotButton.setVisible(false);
+			confirmButton.setVisible(false);
 		} else {
 			saveButton.setVisible(true);
 			deleteButton.setVisible(true);
@@ -283,6 +284,11 @@ public class InventoryWardEdit extends ModalJFrame {
 			validateButton.setVisible(true);
 			printButton.setVisible(false);
 			lotButton.setVisible(true);
+			if (inventory != null && inventory.getStatus().equals(InventoryStatus.validated.toString())) {
+				confirmButton.setEnabled(true);
+			} else {
+				confirmButton.setEnabled(false);
+			}
 		}
 	}
 
@@ -397,6 +403,7 @@ public class InventoryWardEdit extends ModalJFrame {
 			panelFooter.add(getLotButton());
 			panelFooter.add(getDeleteButton());
 			panelFooter.add(getValidateButton());
+			panelFooter.add(getConfirmButton());
 			panelFooter.add(getCleanTableButton());
 			panelFooter.add(getPrintButton());
 			panelFooter.add(getCloseButton());
@@ -586,6 +593,9 @@ public class InventoryWardEdit extends ModalJFrame {
 					inventoryRowSearchList = newMedicalInventoryRows;
 					jTableInventoryRow.updateUI();
 				}
+				if (confirmButton.isEnabled()) {
+					confirmButton.setEnabled(false);
+				}
 			} catch (OHServiceException e) {
 				OHServiceExceptionUtil.showMessages(e);
 			}
@@ -639,6 +649,7 @@ public class InventoryWardEdit extends ModalJFrame {
 							medicalInventoryManager.actualizeMedicalWardInventoryRow(inventory);
 							statusLabel.setText(status.toUpperCase());
 							statusLabel.setForeground(Color.BLUE);
+							confirmButton.setEnabled(true);
 							jTableInventoryRow.setModel(new InventoryRowModel());
 							fireInventoryUpdated();
 							adjustWidth();
@@ -663,6 +674,51 @@ public class InventoryWardEdit extends ModalJFrame {
 		return validateButton;
 	}
 
+	private JButton getConfirmButton() {
+		confirmButton = new JButton(MessageBundle.getMessage("angal.inventory.confirm.btn"));
+		confirmButton.setMnemonic(MessageBundle.getMnemonic("angal.inventory.confirm.btn.key"));
+		if (inventory == null) {
+			confirmButton.setEnabled(false);
+		}
+		confirmButton.addActionListener(actionEvent -> {
+			if (inventory == null) {
+				MessageDialog.error(null, "angal.inventory.inventorymustsavebeforevalidation.msg");
+				return;
+			}
+			int reset = MessageDialog.yesNo(null, "angal.inventory.doyoureallywanttoconfirmthisinventory.msg");
+			if (reset == JOptionPane.YES_OPTION) {
+				newReference = referenceTextField.getText().trim();
+				String lastReference = inventory.getInventoryReference();
+				LocalDateTime lastDate = inventory.getInventoryDate();
+				if (checkParameters(lastReference, lastDate)) {
+					MessageDialog.error(null, "angal.inventory.pleasesaveinventorybeforeconfirmation.msg");
+					return;
+				}
+				if (!inventoryRowSearchList.stream().filter(i -> i.getLot() == null).toList().isEmpty()) {
+					MessageDialog.error(null, "angal.inventory.youcannotconfirmthisinventory.msg");
+					return;
+				}
+				if (!inventoryRowSearchList.stream().filter(i -> i.isNewLot() && i.getRealQty() == 0).toList().isEmpty()) {
+					MessageDialog.error(null, "angal.inventory.youcannotconfirmtheinventorylotrealqtyzero.msg");
+					return;
+				}
+				// confirm inventory
+				try {
+					medicalInventoryManager.confirmMedicalWardInventoryRow(inventory, inventoryRowSearchList);
+					MessageDialog.info(null, "angal.inventory.confirm.success.msg");
+					fireInventoryUpdated();
+					closeButton.doClick();
+				} catch (OHServiceException e) {
+					OHServiceExceptionUtil.showMessages(e);
+					MessageDialog.info(null, "angal.inventory.pleasevalidateinventoryagainsbeforeconfirmation.msg");
+					confirmButton.setEnabled(false);
+					return;
+				}
+			}
+		});
+		return confirmButton;
+	}
+	
 	private JButton getCleanTableButton() {
 		resetButton = new JButton(MessageBundle.getMessage("angal.inventory.clean.btn"));
 		resetButton.setMnemonic(MessageBundle.getMnemonic("angal.inventory.clean.btn.key"));
