@@ -323,9 +323,25 @@ public class InventoryWardBrowser extends ModalJFrame implements InventoryListen
         newButton = new JButton(MessageBundle.getMessage("angal.common.new.btn"));
         newButton.setMnemonic(MessageBundle.getMnemonic("angal.common.new.btn.key"));
         newButton.addActionListener(actionEvent -> {
-	        InventoryWardEdit inventoryWardEdit = new InventoryWardEdit();
-	        InventoryWardEdit.addInventoryListener(InventoryWardBrowser.this);
-	        inventoryWardEdit.showAsModal(InventoryWardBrowser.this);
+        	String draft = InventoryStatus.draft.toString();
+			String validated = InventoryStatus.validated.toString();
+			String inventoryType = InventoryType.ward.toString();
+			List<MedicalInventory> draftMedicalInventories = new ArrayList<>();
+			List<MedicalInventory> validatedMedicalInventories = new ArrayList<>();
+			try {
+				draftMedicalInventories = medicalInventoryManager.getMedicalInventoryByStatusAndInventoryType(draft, inventoryType);
+				validatedMedicalInventories = medicalInventoryManager.getMedicalInventoryByStatusAndInventoryType(validated, inventoryType);
+			} catch (OHServiceException e) {
+				OHServiceExceptionUtil.showMessages(e);
+			}
+			if (draftMedicalInventories.isEmpty() && validatedMedicalInventories.isEmpty()) {
+				InventoryWardEdit inventoryWardEdit = new InventoryWardEdit();
+		        InventoryWardEdit.addInventoryListener(InventoryWardBrowser.this);
+		        inventoryWardEdit.showAsModal(InventoryWardBrowser.this);
+			} else {
+				MessageDialog.error(null, "angal.inventory.cannotcreateanotherinventorywithstatusdraft.msg");
+				return;
+			}   
         });
         return newButton;
     }
