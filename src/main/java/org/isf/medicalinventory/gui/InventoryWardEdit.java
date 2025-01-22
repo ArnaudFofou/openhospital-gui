@@ -1377,7 +1377,7 @@ public class InventoryWardEdit extends ModalJFrame {
 			} else {
 				Lot lot = chooseLot(medical);
 				if (lot != null) {
-					if (lot.getCode().equals("")) {
+					if (lot.getCode().equals("A")) {
 						inventoryRowTemp = new MedicalInventoryRow(0, 0.0, 0.0, null, medical, null);
 						inventoryRowsList.add(inventoryRowTemp);
 					} else {
@@ -1410,8 +1410,21 @@ public class InventoryWardEdit extends ModalJFrame {
 			} else {
 				Lot lot = chooseLot(medical);
 				if (lot != null) {
-					inventoryRowTemp = new MedicalInventoryRow(0, 0.0, 0.0, null, medical, lot);
-					inventoryRowsList.add(inventoryRowTemp);	
+					if (lot.getCode().equals("A")) {
+						inventoryRowTemp = new MedicalInventoryRow(0, 0.0, 0.0, null, medical, null);
+						inventoryRowsList.add(inventoryRowTemp);
+					} else {
+						List<MedicalInventoryRow> medIvRowsWithSameLot = inventoryRowSearchList.stream().filter(invR -> invR.getLot() != null && invR.getLot().getCode().equals(lot.getCode())).toList();
+						if (medIvRowsWithSameLot.isEmpty()) {
+							inventoryRowTemp = new MedicalInventoryRow(0, 0.0, 0.0, null, medical, lot);
+							inventoryRowsList.add(inventoryRowTemp);
+						} else {
+							int info = MessageDialog.yesNo(null, "angal.inventory.productalreadyexist.msg", medical.getDescription(), lot.getCode());
+							if (info == JOptionPane.YES_OPTION) {
+								addInventoryRow(code);
+							}
+						}
+					}
 				}
 			}
 		}
@@ -1900,7 +1913,7 @@ public class InventoryWardEdit extends ModalJFrame {
 			if (ok == JOptionPane.NO_OPTION) {
 				if (row == -1) {
 					row = 0;
-					selectedLot = new Lot("");	
+					selectedLot = new Lot("A");	
 				} else {
 					MessageDialog.error(this, "angal.inventory.selectarowerror.msg");
 					chooseLot(med);
