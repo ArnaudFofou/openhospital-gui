@@ -1375,9 +1375,23 @@ public class InventoryWardEdit extends ModalJFrame {
 				inventoryRowsList = medicalWardList.stream().map(medWard -> new MedicalInventoryRow(0, medWard.getQty(),
 					medWard.getQty(), null, medWard.getMedical(), medWard.getLot())).toList();
 			} else {
-				int info = MessageDialog.yesNo(null, "angal.inventory.productalreadyexist.msg", medical.getDescription());
-				if (info == JOptionPane.YES_OPTION) {
-					inventoryRowsList.add(new MedicalInventoryRow(0, 0.0, 0.0, null, medical, null));
+				Lot lot = chooseLot(medical);
+				if (lot != null) {
+					if (lot.getCode().equals("")) {
+						inventoryRowTemp = new MedicalInventoryRow(0, 0.0, 0.0, null, medical, null);
+						inventoryRowsList.add(inventoryRowTemp);
+					} else {
+						List<MedicalInventoryRow> medIvRowsWithSameLot = inventoryRowSearchList.stream().filter(invR -> invR.getLot() != null && invR.getLot().getCode().equals(lot.getCode())).toList();
+						if (medIvRowsWithSameLot.isEmpty()) {
+							inventoryRowTemp = new MedicalInventoryRow(0, 0.0, 0.0, null, medical, lot);
+							inventoryRowsList.add(inventoryRowTemp);
+						} else {
+							int info = MessageDialog.yesNo(null, "angal.inventory.productalreadyexist.msg", medical.getDescription(), lot.getCode());
+							if (info == JOptionPane.YES_OPTION) {
+								addInventoryRow(code);
+							}
+						}
+					}
 				}
 			}
 
@@ -1395,8 +1409,10 @@ public class InventoryWardEdit extends ModalJFrame {
 				}
 			} else {
 				Lot lot = chooseLot(medical);
-				inventoryRowTemp = new MedicalInventoryRow(0, 0.0, 0.0, null, medical, lot);
-				inventoryRowsList.add(inventoryRowTemp);
+				if (lot != null) {
+					inventoryRowTemp = new MedicalInventoryRow(0, 0.0, 0.0, null, medical, lot);
+					inventoryRowsList.add(inventoryRowTemp);	
+				}
 			}
 		}
 		if (inventoryRowSearchList == null) {
@@ -1864,25 +1880,34 @@ public class InventoryWardEdit extends ModalJFrame {
 		Lot selectedLot = null;
 		Object[] options = {
 				MessageBundle.getMessage("angal.medicalstock.multiplecharging.selectedlot"),
-				MessageBundle.getMessage("angal.medicalstock.multiplecharging.newlot")
+				MessageBundle.getMessage("angal.medicalstock.multiplecharging.newlot"),
+				MessageBundle.getMessage("angal.common.cancel.btn")
 		};
 
 		int row;
 		do {
 			int ok = JOptionPane.showOptionDialog(this, panel,
 				MessageBundle.getMessage("angal.medicalstock.multiplecharging.existinglot"),
-				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-
+				JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+			row = lotTable.getSelectedRow();
 			if (ok == JOptionPane.YES_OPTION) {
-				row = lotTable.getSelectedRow();
 				if (row != -1) {
 					selectedLot = lots.get(row);
 				} else {
 					MessageDialog.error(this, "angal.common.pleaseselectarow.msg");
 				}
+			}
+			if (ok == JOptionPane.NO_OPTION) {
+				if (row == -1) {
+					row = 0;
+					selectedLot = new Lot("");	
+				} else {
+					MessageDialog.error(this, "angal.inventory.selectarowerror.msg");
+					chooseLot(med);
+				}
 			} else {
 				row = 0;
-			}
+			} 
 		} while (row == -1);
 
 		return selectedLot;
