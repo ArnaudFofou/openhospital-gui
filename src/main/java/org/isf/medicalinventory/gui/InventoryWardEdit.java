@@ -1855,7 +1855,7 @@ public class InventoryWardEdit extends ModalJFrame {
 				if (lot.getDueDate().isBefore(TimeTools.getDateToday0())) {
 					statuses.add(EXPIRED);
 				}
-				if (lot.getMainStoreQuantity() == 0) {
+				if (lot.getWardsTotalQuantity() == 0) {
 					statuses.add(EMPTY);
 				}
 				return String.join(",", statuses);
