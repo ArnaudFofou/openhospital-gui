@@ -1847,7 +1847,7 @@ public class InventoryWardEdit extends ModalJFrame {
 			} else if (c == ++i) {
 				return TimeTools.formatDateTime(lot.getDueDate(), DATE_FORMAT_DD_MM_YYYY);
 			} else if (c == ++i) {
-				return lot.getMainStoreQuantity();
+				return lot.getWardsTotalQuantity();
 			} else if (c == ++i) {
 				return lot.getCost();
 			} else if (c == ++i) {
