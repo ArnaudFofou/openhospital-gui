@@ -1,6 +1,6 @@
 /*
  * Open Hospital (www.open-hospital.org)
- * Copyright © 2006-2024 Informatici Senza Frontiere (info@informaticisenzafrontiere.org)
+ * Copyright © 2006-2025 Informatici Senza Frontiere (info@informaticisenzafrontiere.org)
  *
  * Open Hospital is a free and open source software for healthcare data management.
  *
@@ -323,9 +323,25 @@ public class InventoryWardBrowser extends ModalJFrame implements InventoryListen
         newButton = new JButton(MessageBundle.getMessage("angal.common.new.btn"));
         newButton.setMnemonic(MessageBundle.getMnemonic("angal.common.new.btn.key"));
         newButton.addActionListener(actionEvent -> {
-	        InventoryWardEdit inventoryWardEdit = new InventoryWardEdit();
-	        InventoryWardEdit.addInventoryListener(InventoryWardBrowser.this);
-	        inventoryWardEdit.showAsModal(InventoryWardBrowser.this);
+        	String draft = InventoryStatus.draft.toString();
+			String validated = InventoryStatus.validated.toString();
+			String inventoryType = InventoryType.ward.toString();
+			List<MedicalInventory> draftMedicalInventories = new ArrayList<>();
+			List<MedicalInventory> validatedMedicalInventories = new ArrayList<>();
+			try {
+				draftMedicalInventories = medicalInventoryManager.getMedicalInventoryByStatusAndInventoryType(draft, inventoryType);
+				validatedMedicalInventories = medicalInventoryManager.getMedicalInventoryByStatusAndInventoryType(validated, inventoryType);
+			} catch (OHServiceException e) {
+				OHServiceExceptionUtil.showMessages(e);
+			}
+			if (draftMedicalInventories.isEmpty() && validatedMedicalInventories.isEmpty()) {
+				InventoryWardEdit inventoryWardEdit = new InventoryWardEdit();
+		        InventoryWardEdit.addInventoryListener(InventoryWardBrowser.this);
+		        inventoryWardEdit.showAsModal(InventoryWardBrowser.this);
+			} else {
+				MessageDialog.error(null, "angal.inventory.cannotcreateanotherinventorywithstatusdraft.msg");
+				return;
+			}   
         });
         return newButton;
     }
@@ -348,6 +364,11 @@ public class InventoryWardBrowser extends ModalJFrame implements InventoryListen
 			inventory = inventoryList.get(selectedRow);
 			if (inventory.getStatus().equals(InventoryStatus.canceled.toString())) {
 				MessageDialog.error(this, "angal.inventory.cancelednoteditable.msg");
+				return;
+			}
+			
+			if (inventory.getStatus().equals(InventoryStatus.done.toString())) {
+				MessageDialog.error(null, "angal.inventory.donenoteditable.msg");
 				return;
 			}
 			InventoryWardEdit inventoryWardEdit = new InventoryWardEdit(inventory, "update");
