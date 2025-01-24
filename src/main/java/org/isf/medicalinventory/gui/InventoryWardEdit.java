@@ -69,8 +69,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.EventListenerList;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.plaf.DimensionUIResource;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -975,13 +973,10 @@ public class InventoryWardEdit extends ModalJFrame {
 			DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
 			centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
 			jTableInventoryRow.getColumnModel().getColumn(3).setCellRenderer(centerRenderer);
-			jTableInventoryRow.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			jTableInventoryRow.getSelectionModel().addListSelectionListener(listSelectionEvent -> {
 
-				@Override
-				public void valueChanged(ListSelectionEvent e) {
-					if (e.getValueIsAdjusting()) {
-						jTableInventoryRow.editCellAt(jTableInventoryRow.getSelectedRow(), jTableInventoryRow.getSelectedColumn());
-					}
+				if (listSelectionEvent.getValueIsAdjusting()) {
+					jTableInventoryRow.editCellAt(jTableInventoryRow.getSelectedRow(), jTableInventoryRow.getSelectedColumn());
 				}
 			});
 
