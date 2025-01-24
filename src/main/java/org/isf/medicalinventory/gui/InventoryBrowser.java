@@ -104,7 +104,7 @@ public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 	private JButton next;
 	private JButton previous;
 	private JComboBox<Integer> pagesComboBox = new JComboBox<>();
-	private JLabel ofPagesLabel = new JLabel("/ 1 " + MessageBundle.getMessage("angal.common.page.txt"));
+	private JLabel ofPagesLabel = new JLabel(MessageBundle.formatMessage("angal.common.pages.fmt.txt"), 1);
 	private static int PAGE_SIZE = 24;
 	private int startIndex = 0;
 	private int totalRows;
