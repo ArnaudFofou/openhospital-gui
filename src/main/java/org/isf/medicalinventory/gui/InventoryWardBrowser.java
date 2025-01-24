@@ -133,6 +133,7 @@ public class InventoryWardBrowser extends ModalJFrame implements InventoryListen
 
 		addWindowListener(new WindowAdapter() {
 
+			@Override
 			public void windowClosing(WindowEvent e) {
 				dispose();
 			}
