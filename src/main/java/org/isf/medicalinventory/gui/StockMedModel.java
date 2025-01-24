@@ -35,7 +35,7 @@ public class StockMedModel extends DefaultTableModel {
 
 	private static final long serialVersionUID = 1L;
 	private List<Medical> medList;
-	private List<Medical> initList = new ArrayList<Medical>();
+	private List<Medical> initList = new ArrayList<>();
 
 	public StockMedModel(List<Medical> meds) {
 		medList = meds;
