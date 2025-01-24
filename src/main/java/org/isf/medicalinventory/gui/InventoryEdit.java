@@ -327,7 +327,7 @@ public class InventoryEdit extends ModalJFrame {
 			printButton.setVisible(true);
 			selectButton.setEnabled(false);
 			codeTextField.setEnabled(false);
-			
+
 		} else {
 			saveButton.setVisible(true);
 			validateButton.setVisible(true);
@@ -563,13 +563,14 @@ public class InventoryEdit extends ModalJFrame {
 				frame.setLocationRelativeTo(null);
 				frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 				frame.addWindowListener(new WindowAdapter() {
-				    @Override
-				    public void windowClosing(WindowEvent e) {
-				        int choice = MessageDialog.yesNo(frame, "angal.inventory.areyousureyouwantoclosethiswindow.msg");
-				        if (choice == JOptionPane.YES_OPTION) {
-				            frame.dispose();
-				        }
-				    }
+
+					@Override
+					public void windowClosing(WindowEvent e) {
+						int choice = MessageDialog.yesNo(frame, "angal.inventory.areyousureyouwantoclosethiswindow.msg");
+						if (choice == JOptionPane.YES_OPTION) {
+							frame.dispose();
+						}
+					}
 				});
 				frame.setVisible(true);
 			});
@@ -1013,7 +1014,8 @@ public class InventoryEdit extends ModalJFrame {
 				String wardCode = inventory.getDestination();
 				String lastReference = inventory.getInventoryReference();
 				LocalDateTime lastDate = inventory.getInventoryDate();
-				List<MedicalInventoryRow> invRowWithoutRealQty = inventoryRowSearchList.stream().filter(invRow -> invRow.getRealQty() == 0 && invRow.isNewLot()).collect(Collectors.toList());
+				List<MedicalInventoryRow> invRowWithoutRealQty = inventoryRowSearchList.stream().filter(invRow -> invRow.getRealQty() == 0 && invRow.isNewLot())
+					.collect(Collectors.toList());
 				if (!invRowWithoutRealQty.isEmpty()) {
 					MessageDialog.error(null, "angal.inventory.allinventoryrowswithnewlotshouldhaverealqtygreatterthanzero.msg");
 					return;
@@ -1025,7 +1027,7 @@ public class InventoryEdit extends ModalJFrame {
 				}
 				if (checkParameters(wardCode, chargeCode, dischargeCode, supplierId, lastReference, lastDate)) {
 					MessageDialog.error(null, "angal.inventory.pleasesaveinventorybeforevalidateit.msg");
-                    return;
+					return;
 				}
 				// validate inventory
 				try {
@@ -1057,10 +1059,10 @@ public class InventoryEdit extends ModalJFrame {
 					} else {
 						try {
 							inventory.setStatus(InventoryStatus.draft.toString());
-	                        statusLabel.setText(InventoryStatus.draft.toString().toUpperCase());
-	                        statusLabel.setForeground(Color.GRAY);
-	                        inventory = medicalInventoryManager.updateMedicalInventory(inventory, true);
-	                        fireInventoryUpdated();
+							statusLabel.setText(InventoryStatus.draft.toString().toUpperCase());
+							statusLabel.setForeground(Color.GRAY);
+							inventory = medicalInventoryManager.updateMedicalInventory(inventory, true);
+							fireInventoryUpdated();
 						} catch (OHServiceException ex) {
 							OHServiceExceptionUtil.showMessages(ex);
 						}
@@ -1099,7 +1101,8 @@ public class InventoryEdit extends ModalJFrame {
 				String wardCode = inventory.getDestination();
 				String lastReference = inventory.getInventoryReference();
 				LocalDateTime lastDate = inventory.getInventoryDate();
-				List<MedicalInventoryRow> invRowWithoutRealQty = inventoryRowSearchList.stream().filter(invRow -> invRow.getRealQty() == 0 && invRow.isNewLot()).collect(Collectors.toList());
+				List<MedicalInventoryRow> invRowWithoutRealQty = inventoryRowSearchList.stream().filter(invRow -> invRow.getRealQty() == 0 && invRow.isNewLot())
+					.collect(Collectors.toList());
 				if (!invRowWithoutRealQty.isEmpty()) {
 					MessageDialog.error(null, "angal.inventory.allinventoryrowswithnewlotshouldhaverealqtygreatterthanzero.msg");
 					return;
@@ -1111,7 +1114,7 @@ public class InventoryEdit extends ModalJFrame {
 				}
 				if (checkParameters(wardCode, chargeCode, dischargeCode, supplierId, lastReference, lastDate)) {
 					MessageDialog.error(null, "angal.inventory.pleasesaveinventorybeforeconfirmation.msg");
-                    return;
+					return;
 				}
 				// confirm inventory
 				try {
@@ -1478,6 +1481,7 @@ public class InventoryEdit extends ModalJFrame {
 		} while (lot == null);
 		return lot;
 	}
+
 	private BigDecimal askCost(int qty, BigDecimal lastCost) {
 		double cost = 0.;
 		do {
@@ -2077,23 +2081,23 @@ public class InventoryEdit extends ModalJFrame {
 	}
 
 	private boolean checkParameters(String wardCode, String chargeCode, String dischargeCode, Integer supplierId, String reference, LocalDateTime date) {
-	    return !lotsSaved.isEmpty()
-	            || !inventoryRowListAdded.isEmpty()
-	            || !lotsDeleted.isEmpty()
-	            || !inventoryRowsToDelete.isEmpty()
-	            || (destination != null && isMismatch(destination.getCode(), wardCode))
-	            || (chargeType != null && isMismatch(chargeType.getCode(), chargeCode))
-	            || (dischargeType != null && isMismatch(dischargeType.getCode(), dischargeCode))
-	            || (supplier != null && supplier.getSupId() != supplierId)
-	            || !isSameDate(date, dateInventory);
+		return !lotsSaved.isEmpty()
+			|| !inventoryRowListAdded.isEmpty()
+			|| !lotsDeleted.isEmpty()
+			|| !inventoryRowsToDelete.isEmpty()
+			|| (destination != null && isMismatch(destination.getCode(), wardCode))
+			|| (chargeType != null && isMismatch(chargeType.getCode(), chargeCode))
+			|| (dischargeType != null && isMismatch(dischargeType.getCode(), dischargeCode))
+			|| (supplier != null && supplier.getSupId() != supplierId)
+			|| !isSameDate(date, dateInventory);
 	}
-	
+
 	private boolean isMismatch(String value, String expectedValue) {
-	    return !value.equals(expectedValue);
+		return !value.equals(expectedValue);
 	}
 
 	private boolean isSameDate(LocalDateTime date1, LocalDateTime date2) {
-	    return date1.toLocalDate().equals(date2.toLocalDate());
+		return date1.toLocalDate().equals(date2.toLocalDate());
 	}
 
 	private JComboBox<MedicalType> getJComboMedicalType() {
