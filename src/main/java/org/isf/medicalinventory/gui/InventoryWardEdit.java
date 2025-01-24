@@ -728,7 +728,7 @@ public class InventoryWardEdit extends ModalJFrame {
 		});
 		return confirmButton;
 	}
-	
+
 	private JButton getCleanTableButton() {
 		resetButton = new JButton(MessageBundle.getMessage("angal.inventory.clean.btn"));
 		resetButton.setMnemonic(MessageBundle.getMnemonic("angal.inventory.clean.btn.key"));
@@ -905,16 +905,16 @@ public class InventoryWardEdit extends ModalJFrame {
 		printButton.setMnemonic(MessageBundle.getMnemonic("angal.common.print.btn.key"));
 		printButton.setEnabled(true);
 
-        printButton.addActionListener(e -> {
-            int printRealQty = 0;
-            int response = MessageDialog.yesNo(this, "angal.inventory.askforrealquantityempty.msg");
-            if (response == JOptionPane.YES_OPTION) {
-                printRealQty = 1;
-            }
-            new GenericReportPharmaceuticalInventory(inventory, "InventoryWard", printRealQty);
-        });
-        return printButton;
-    }
+		printButton.addActionListener(e -> {
+			int printRealQty = 0;
+			int response = MessageDialog.yesNo(this, "angal.inventory.askforrealquantityempty.msg");
+			if (response == JOptionPane.YES_OPTION) {
+				printRealQty = 1;
+			}
+			new GenericReportPharmaceuticalInventory(inventory, "InventoryWard", printRealQty);
+		});
+		return printButton;
+	}
 
 	private JButton getCloseButton() {
 		closeButton = new JButton(MessageBundle.getMessage("angal.common.close.btn"));
@@ -1372,7 +1372,8 @@ public class InventoryWardEdit extends ModalJFrame {
 						inventoryRowTemp = new MedicalInventoryRow(0, 0.0, 0.0, null, medical, null);
 						inventoryRowsList.add(inventoryRowTemp);
 					} else {
-						List<MedicalInventoryRow> medIvRowsWithSameLot = inventoryRowSearchList.stream().filter(invR -> invR.getLot() != null && invR.getLot().getCode().equals(lot.getCode())).toList();
+						List<MedicalInventoryRow> medIvRowsWithSameLot = inventoryRowSearchList.stream()
+							.filter(invR -> invR.getLot() != null && invR.getLot().getCode().equals(lot.getCode())).toList();
 						if (medIvRowsWithSameLot.isEmpty()) {
 							inventoryRowTemp = new MedicalInventoryRow(0, 0.0, 0.0, null, medical, lot);
 							inventoryRowsList.add(inventoryRowTemp);
@@ -1405,7 +1406,8 @@ public class InventoryWardEdit extends ModalJFrame {
 						inventoryRowTemp = new MedicalInventoryRow(0, 0.0, 0.0, null, medical, null);
 						inventoryRowsList.add(inventoryRowTemp);
 					} else {
-						List<MedicalInventoryRow> medIvRowsWithSameLot = inventoryRowSearchList.stream().filter(invR -> invR.getLot() != null && invR.getLot().getCode().equals(lot.getCode())).toList();
+						List<MedicalInventoryRow> medIvRowsWithSameLot = inventoryRowSearchList.stream()
+							.filter(invR -> invR.getLot() != null && invR.getLot().getCode().equals(lot.getCode())).toList();
 						if (medIvRowsWithSameLot.isEmpty()) {
 							inventoryRowTemp = new MedicalInventoryRow(0, 0.0, 0.0, null, medical, lot);
 							inventoryRowsList.add(inventoryRowTemp);
@@ -1456,7 +1458,7 @@ public class InventoryWardEdit extends ModalJFrame {
 			framas.setParentFrame(dialog);
 			dialog.setContentPane(framas);
 			dialog.setVisible(true);
-			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 			med = framas.getSelectedMedical();
 			return med;
 		}
@@ -1769,7 +1771,7 @@ public class InventoryWardEdit extends ModalJFrame {
 		return !lotsSaved.isEmpty() || !inventoryRowListAdded.isEmpty() || !lotsDeleted.isEmpty() || !inventoryRowsToDelete.isEmpty()
 			|| (reference != null && !reference.equals(newReference)) || !date.toLocalDate().equals(dateInventory.toLocalDate());
 	}
-	
+
 	class StockLotModel extends DefaultTableModel {
 
 		private static final long serialVersionUID = 1L;
@@ -1823,7 +1825,7 @@ public class InventoryWardEdit extends ModalJFrame {
 			return false;
 		}
 	}
-	
+
 	protected Lot chooseLot(Medical med) {
 		List<Lot> lots;
 		try {
@@ -1867,14 +1869,14 @@ public class InventoryWardEdit extends ModalJFrame {
 			if (ok == JOptionPane.NO_OPTION) {
 				if (row == -1) {
 					row = 0;
-					selectedLot = new Lot("A");	
+					selectedLot = new Lot("A");
 				} else {
 					MessageDialog.error(this, "angal.inventory.selectarowerror.msg");
 					chooseLot(med);
 				}
 			} else {
 				row = 0;
-			} 
+			}
 		} while (row == -1);
 
 		return selectedLot;
