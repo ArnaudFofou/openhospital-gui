@@ -519,10 +519,12 @@ public class InventoryWardBrowser extends ModalJFrame implements InventoryListen
 			return inventoryList.size();
 		}
 
+		@Override
 		public String getColumnName(int c) {
 			return pColums[c];
 		}
 
+		@Override
 		public int getColumnCount() {
 			return pColums.length;
 		}
