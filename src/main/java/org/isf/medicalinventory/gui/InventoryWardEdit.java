@@ -112,11 +112,11 @@ public class InventoryWardEdit extends ModalJFrame {
 
 	public interface InventoryListener extends EventListener {
 
-		public void InventoryInserted(AWTEvent e);
+		void InventoryInserted(AWTEvent e);
 
-		public void InventoryUpdated(AWTEvent e);
+		void InventoryUpdated(AWTEvent e);
 
-		public void InventoryCancelled(AWTEvent e);
+		void InventoryCancelled(AWTEvent e);
 	}
 
 	public static void addInventoryListener(InventoryListener l) {
@@ -192,12 +192,12 @@ public class InventoryWardEdit extends ModalJFrame {
 			MessageBundle.getMessage("angal.medicalstock.duedate").toUpperCase()
 	};
 	private final Class[] lotSelectionColumnClasse = { String.class, String.class, String.class };
-	private MedicalInventory inventory = null;
+	private MedicalInventory inventory;
 	private JRadioButton specificRadio;
 	private JRadioButton allRadio;
 	private JLabel dateInventoryLabel;
 	private JTextField codeTextField;
-	private String code = null;
+	private String code;
 	private String mode;
 	private JLabel statusLabel;
 	private String wardId = "";
@@ -720,7 +720,6 @@ public class InventoryWardEdit extends ModalJFrame {
 					OHServiceExceptionUtil.showMessages(e);
 					MessageDialog.info(null, "angal.inventory.pleasevalidateinventoryagainsbeforeconfirmation.msg");
 					confirmButton.setEnabled(false);
-					return;
 				}
 			}
 		});
@@ -1665,7 +1664,7 @@ public class InventoryWardEdit extends ModalJFrame {
 	}
 
 	private Lot getLot(Lot lotToUpdate) throws OHServiceException {
-		Lot lot = null;
+		Lot lot;
 		if (isAutomaticLotIn()) {
 			LocalDateTime preparationDate = TimeTools.getNow().truncatedTo(ChronoUnit.MINUTES);
 			LocalDateTime expiringDate = askExpiringDate();
