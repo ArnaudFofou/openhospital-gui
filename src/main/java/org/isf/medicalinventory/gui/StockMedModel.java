@@ -82,7 +82,7 @@ public class StockMedModel extends DefaultTableModel {
 	public void filter(String searchValue) {
 		medList.clear();
 		for (Iterator<Medical> iterator = initList.iterator(); iterator.hasNext();) {
-			Medical med = (Medical) iterator.next();
+			Medical med = iterator.next();
 			if (med.getProdCode().trim().equalsIgnoreCase(searchValue.trim())) {
 				medList.add(med);
 			} else if (NormalizeString.normalizeContains(
