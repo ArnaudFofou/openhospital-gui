@@ -85,8 +85,7 @@ public class StockMedModel extends DefaultTableModel {
 			Medical med = iterator.next();
 			if (med.getProdCode().trim().equalsIgnoreCase(searchValue.trim())) {
 				medList.add(med);
-			} else if (NormalizeString.normalizeContains(
-				med.getProdCode().toLowerCase().trim() + med.getDescription().toLowerCase(),
+			} else if (NormalizeString.normalizeContains(med.getProdCode().toLowerCase().trim() + med.getDescription().toLowerCase(),
 				searchValue.toLowerCase().trim())) {
 				medList.add(med);
 			}
