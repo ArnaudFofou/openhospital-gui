@@ -123,34 +123,19 @@ public class InventoryEdit extends ModalJFrame {
 
 	public interface InventoryListener extends EventListener {
 
-		public void InventoryInserted(AWTEvent e);
+		void InventoryInserted(AWTEvent e);
 
-		public void InventoryUpdated(AWTEvent e);
+		void InventoryUpdated(AWTEvent e);
 
-		public void InventoryCancelled(AWTEvent e);
+		void InventoryCancelled(AWTEvent e);
 	}
 
 	public static void addInventoryListener(InventoryListener listener) {
 		InventoryListeners.add(InventoryListener.class, listener);
 	}
-
+	
 	public static void removeInventoryListener(InventoryListener listener) {
 		InventoryListeners.remove(InventoryListener.class, listener);
-	}
-
-	private void fireInventoryInserted() {
-		AWTEvent event = new AWTEvent(new Object(), AWTEvent.RESERVED_ID_MAX + 1) {
-
-			private static final long serialVersionUID = 1L;
-		};
-
-		EventListener[] listeners = InventoryListeners.getListeners(InventoryListener.class);
-		for (int i = 0; i < listeners.length; i++) {
-			((InventoryListener) listeners[i]).InventoryInserted(event);
-		}
-		if (jTableInventoryRow != null) {
-			jTableInventoryRow.updateUI();
-		}
 	}
 
 	private void fireInventoryUpdated() {
@@ -160,12 +145,23 @@ public class InventoryEdit extends ModalJFrame {
 		};
 
 		EventListener[] listeners = InventoryListeners.getListeners(InventoryListener.class);
-		for (int i = 0; i < listeners.length; i++) {
-			((InventoryListener) listeners[i]).InventoryUpdated(event);
+		for (EventListener listener : listeners) {
+			((InventoryListener) listener).InventoryUpdated(event);
 		}
-		if (jTableInventoryRow != null) {
-			jTableInventoryRow.updateUI();
+		jTableInventoryRow.updateUI();
+	}
+
+	private void fireInventoryInserted() {
+		AWTEvent event = new AWTEvent(new Object(), AWTEvent.RESERVED_ID_MAX + 1) {
+
+			private static final long serialVersionUID = 1L;
+		};
+
+		EventListener[] listeners = InventoryListeners.getListeners(InventoryListener.class);
+		for (EventListener listener : listeners) {
+			((InventoryListener) listener).InventoryInserted(event);
 		}
+		jTableInventoryRow.updateUI();
 	}
 
 	private GoodDateChooser jCalendarInventory;
@@ -501,6 +497,7 @@ public class InventoryEdit extends ModalJFrame {
 
 	private GoodDateChooser getJCalendarFrom() {
 		if (jCalendarInventory == null) {
+
 			jCalendarInventory = new GoodDateChooser(LocalDate.now(), false, false);
 			if (inventory != null) {
 				jCalendarInventory.setDate(inventory.getInventoryDate().toLocalDate());
@@ -595,7 +592,6 @@ public class InventoryEdit extends ModalJFrame {
 							medicalInventoryRowManager.updateMedicalInventoryRow(invRow);
 							movStockInsertingManager.deleteLot(entry.getValue());
 						}
-
 					}
 					medicalInventoryRowManager.deleteMedicalInventoryRows(inventoryRowsToDelete);
 				}
@@ -603,8 +599,7 @@ public class InventoryEdit extends ModalJFrame {
 				List<MedicalInventoryRow> newMedicalInventoryRows = new ArrayList<>();
 				if (mode.equals("new")) {
 					newReference = referenceTextField.getText().trim();
-					boolean refExist = false;
-					refExist = medicalInventoryManager.referenceExists(newReference);
+					boolean refExist = medicalInventoryManager.referenceExists(newReference);
 					boolean referenceExistonMovementStock = movStockInsertingManager.refNoExists(newReference);
 					if (refExist || referenceExistonMovementStock) {
 						MessageDialog.error(null, "angal.inventory.referencealreadyused.msg");

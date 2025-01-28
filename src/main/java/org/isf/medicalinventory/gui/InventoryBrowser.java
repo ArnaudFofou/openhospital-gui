@@ -35,11 +35,9 @@ import java.awt.event.ItemEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -73,10 +71,11 @@ import org.springframework.data.domain.Page;
 public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 
 	private static final long serialVersionUID = 1L;
+
 	private GoodDateChooser jCalendarTo;
 	private GoodDateChooser jCalendarFrom;
-	private LocalDateTime dateFrom = TimeTools.getNow();
-	private LocalDateTime dateTo = TimeTools.getNow();
+	private LocalDateTime dateFrom = TimeTools.getDateToday0();
+	private LocalDateTime dateTo = TimeTools.getDateToday24();
 	private JLabel jLabelTo;
 	private JLabel jLabelFrom;
 	private JPanel panelHeader;
@@ -93,10 +92,11 @@ public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 			MessageBundle.getMessage("angal.common.reference.label").toUpperCase(),
 			MessageBundle.getMessage("angal.common.date.txt").toUpperCase(),
 			MessageBundle.getMessage("angal.common.status.txt").toUpperCase(),
-			MessageBundle.getMessage("angal.common.user.col").toUpperCase() };
+			MessageBundle.getMessage("angal.common.user.col").toUpperCase()
+	};
 	private int[] columwidth = { 150, 150, 150, 200 };
-	private boolean[] columnCentered = { false, true, true, true };
 	private Class[] columnClasses = { String.class, String.class, String.class, String.class };
+	private boolean[] columnCentered = { false, true, true, true };
 	private JComboBox<String> statusComboBox;
 	private JLabel statusLabel;
 	private JButton next;
@@ -163,7 +163,6 @@ public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 			pagesComboBox.setSelectedItem(page);
 		});
 		pagesComboBox.addItemListener(itemEvent -> {
-
 			int eventID = itemEvent.getStateChange();
 
 			if (eventID == ItemEvent.SELECTED) {
@@ -257,7 +256,7 @@ public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 	private JPanel getPanelFooter() {
 		if (panelFooter == null) {
 			panelFooter = new JPanel();
-			next = new JButton(MessageBundle.getMessage("angal.inventory.nextarrow.btn"));
+			next = new JButton(MessageBundle.getMessage("angal.inventory.arrownext.btn"));
 			next.setMnemonic(KeyEvent.VK_RIGHT);
 			previous = new JButton(MessageBundle.getMessage("angal.inventory.arrowprevious.btn"));
 			next.setMnemonic(KeyEvent.VK_LEFT);
@@ -268,33 +267,13 @@ public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 			panelFooter.add(next);
 
 			panelFooter.add(getNewButton());
-			panelFooter.add(getUpdateButton());
 			panelFooter.add(getViewButton());
+			panelFooter.add(getEditButton());
 			panelFooter.add(getDeleteButton());
 			panelFooter.add(getCloseButton());
 		}
 		initializePagesCombo();
 		return panelFooter;
-	}
-
-	private GoodDateChooser getJCalendarTo() {
-		if (jCalendarTo == null) {
-			jCalendarTo = new GoodDateChooser(LocalDate.now(), false, false);
-			jCalendarTo.addDateChangeListener(event -> {
-				dateTo = jCalendarTo.getDateEndOfDay();
-				totalRows = medicalInventoryManager.getInventoryCount(InventoryType.main.toString());
-				startIndex = 0;
-				previous.setEnabled(false);
-				if (totalRows <= PAGE_SIZE) {
-					next.setEnabled(false);
-				} else {
-					next.setEnabled(true);
-				}
-				jTableInventory.setModel(new InventoryBrowsingModel(startIndex, PAGE_SIZE));
-				initializePagesCombo();
-			});
-		}
-		return jCalendarTo;
 	}
 
 	private GoodDateChooser getJCalendarFrom() {
@@ -317,6 +296,26 @@ public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 		return jCalendarFrom;
 	}
 
+	private GoodDateChooser getJCalendarTo() {
+		if (jCalendarTo == null) {
+			jCalendarTo = new GoodDateChooser(LocalDate.now(), false, false);
+			jCalendarTo.addDateChangeListener(event -> {
+				dateTo = jCalendarTo.getDateEndOfDay();
+				totalRows = medicalInventoryManager.getInventoryCount(InventoryType.main.toString());
+				startIndex = 0;
+				previous.setEnabled(false);
+				if (totalRows <= PAGE_SIZE) {
+					next.setEnabled(false);
+				} else {
+					next.setEnabled(true);
+				}
+				jTableInventory.setModel(new InventoryBrowsingModel(startIndex, PAGE_SIZE));
+				initializePagesCombo();
+			});
+		}
+		return jCalendarTo;
+	}
+
 	private JLabel getJLabelTo() {
 		if (jLabelTo == null) {
 			jLabelTo = new JLabel();
@@ -325,6 +324,7 @@ public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 		}
 		return jLabelTo;
 	}
+
 	private JLabel getJLabelFrom() {
 		if (jLabelFrom == null) {
 			jLabelFrom = new JLabel();
@@ -357,11 +357,11 @@ public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 				MessageDialog.error(null, "angal.inventory.cannotcreateanotherinventorywithstatusdraft.msg");
 				return;
 			}
-
 		});
 		return jButtonNew;
 	}
-	private JButton getUpdateButton() {
+
+	private JButton getEditButton() {
 		jButtonEdit = new JButton(MessageBundle.getMessage("angal.common.edit.btn"));
 		jButtonEdit.setMnemonic(MessageBundle.getMnemonic("angal.common.edit.btn.key"));
 		jButtonEdit.setEnabled(false);
@@ -394,8 +394,8 @@ public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 	}
 
 	private JButton getViewButton() {
-		jButtonView = new JButton(MessageBundle.getMessage("angal.common.view.btn"));
-		jButtonView.setMnemonic(MessageBundle.getMnemonic("angal.common.view.btn.key"));
+		jButtonView = new JButton(MessageBundle.getMessage("angal.inventory.view.btn"));
+		jButtonView.setMnemonic(MessageBundle.getMnemonic("angal.inventory.view.btn.key"));
 		jButtonView.setEnabled(false);
 		jButtonView.addActionListener(actionEvent -> {
 			MedicalInventory inventory = new MedicalInventory();
@@ -456,9 +456,7 @@ public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 	private JButton getCloseButton() {
 		jButtonClose = new JButton(MessageBundle.getMessage("angal.common.close.btn"));
 		jButtonClose.setMnemonic(MessageBundle.getMnemonic("angal.common.close.btn.key"));
-		jButtonClose.addActionListener(actionEvent -> {
-			dispose();
-		});
+		jButtonClose.addActionListener(actionEvent -> dispose());
 		return jButtonClose;
 	}
 
@@ -520,10 +518,10 @@ public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 
 		public InventoryBrowsingModel(int page, int pageSize) {
 			inventoryList = new ArrayList<>();
-			String state = statusComboBox.getSelectedIndex() > 0 ? statusComboBox.getSelectedItem().toString().toLowerCase() : null;
+			String status = statusComboBox.getSelectedIndex() > 0 ? statusComboBox.getSelectedItem().toString().toLowerCase() : null;
 			String type = InventoryType.main.toString();
 			try {
-				Page<MedicalInventory> medInventorypage = medicalInventoryManager.getMedicalInventoryByParamsPageable(dateFrom, dateTo, state, type, page,
+				Page<MedicalInventory> medInventorypage = medicalInventoryManager.getMedicalInventoryByParamsPageable(dateFrom, dateTo, status, type, page,
 					pageSize);
 				inventoryList = medInventorypage.getContent();
 			} catch (OHServiceException e) {
@@ -578,18 +576,12 @@ public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 
 	}
 
-	public String formatDateTime(GregorianCalendar time) {
-		SimpleDateFormat format = new SimpleDateFormat("dd/MM/yy"); //$NON-NLS-1$
-		return format.format(time.getTime());
-	}
-
 	private JComboBox<String> getComboBox() {
 		if (statusComboBox == null) {
 			statusComboBox = new JComboBox<>();
 			statusComboBox.addItem(MessageBundle.getMessage("angal.common.all.txt"));
-			List<String> statusList = medicalInventoryManager.getStatusList();
-			for (String status : statusList) {
-				statusComboBox.addItem(status);
+			for (InventoryStatus currentStatus : InventoryStatus.values()) {
+				statusComboBox.addItem(MessageBundle.getMessage("angal.inventory." + currentStatus));
 			}
 			statusComboBox.addActionListener(actionEvent -> {
 				totalRows = medicalInventoryManager.getInventoryCount(InventoryType.main.toString());

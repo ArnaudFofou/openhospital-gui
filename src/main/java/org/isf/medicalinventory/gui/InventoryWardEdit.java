@@ -119,8 +119,12 @@ public class InventoryWardEdit extends ModalJFrame {
 		void InventoryCancelled(AWTEvent e);
 	}
 
-	public static void addInventoryListener(InventoryListener l) {
-		InventoryListeners.add(InventoryListener.class, l);
+	public static void addInventoryListener(InventoryListener listener) {
+		InventoryListeners.add(InventoryListener.class, listener);
+	}
+	
+	public static void removeInventoryListener(InventoryListener listener) {
+		InventoryListeners.remove(InventoryListener.class, listener);
 	}
 
 	private void fireInventoryUpdated() {
@@ -150,27 +154,27 @@ public class InventoryWardEdit extends ModalJFrame {
 	}
 
 	private GoodDateChooser jCalendarInventory;
-	private LocalDateTime dateInventory = TimeTools.getServerDateTime();
+	private LocalDateTime dateInventory = TimeTools.getNow();
 	private JPanel panelHeader;
 	private JPanel panelFooter;
 	private JPanel panelContent;
 	private JButton closeButton;
+	private JButton printButton;
+	private JButton deleteButton;
 	private JButton saveButton;
 	private JButton resetButton;
 	private JButton lotButton;
-	private JButton printButton;
 	private JButton validateButton;
-	private JButton deleteButton;
+	private JButton confirmButton;
 	private JScrollPane scrollPaneInventory;
 	private JTable jTableInventoryRow;
-	private JButton confirmButton;
 	private List<MedicalInventoryRow> inventoryRowList = new ArrayList<>();
 	private List<MedicalInventoryRow> inventoryRowSearchList = new ArrayList<>();
 	private List<MedicalInventoryRow> inventoryRowsToDelete = new ArrayList<>();
 	private List<MedicalInventoryRow> inventoryRowListAdded = new ArrayList<>();
 	private List<Lot> lotsSaved = new ArrayList<>();
 	private HashMap<Integer, Lot> lotsDeleted = new HashMap<>();
-	private String[] pColums = { MessageBundle.getMessage("angal.inventory.id.col").toUpperCase(),
+	private String[] columsNames = { MessageBundle.getMessage("angal.inventory.id.col").toUpperCase(),
 			MessageBundle.getMessage("angal.common.code.txt").toUpperCase(),
 			MessageBundle.getMessage("angal.inventory.medical.col").toUpperCase(),
 			MessageBundle.getMessage("angal.inventory.newlot.col").toUpperCase(),
@@ -181,10 +185,10 @@ public class InventoryWardEdit extends ModalJFrame {
 			MessageBundle.getMessage("angal.inventory.unitprice.col").toUpperCase(),
 			MessageBundle.getMessage("angal.inventory.totalprice.col").toUpperCase()
 	};
-	private int[] pColumwidth = { 50, 50, 200, 100, 100, 100, 100, 80, 80, 80 };
+	private int[] columwidth = { 50, 50, 200, 100, 100, 100, 100, 80, 80, 80 };
 	private boolean[] columnEditable = { false, false, false, false, false, false, false, true, false, false };
 	private boolean[] columnEditableView = { false, false, false, false, false, false, false, false, false, false };
-	private boolean[] pColumnVisible = { false, true, true, true, !GeneralData.AUTOMATICLOT_IN, true, true, true, GeneralData.LOTWITHCOST,
+	private boolean[] columnVisible = { false, true, true, true, !GeneralData.AUTOMATICLOT_IN, true, true, true, GeneralData.LOTWITHCOST,
 			GeneralData.LOTWITHCOST };
 	private final String[] lotSelectionColumnNames = {
 			MessageBundle.getMessage("angal.medicalstock.lotid").toUpperCase(),
@@ -227,10 +231,10 @@ public class InventoryWardEdit extends ModalJFrame {
 		disabledSomeComponents();
 	}
 
-	public InventoryWardEdit(MedicalInventory inventory, String modee) {
+	public InventoryWardEdit(MedicalInventory inventory, String mod) {
 		this.inventory = inventory;
 		wardId = this.inventory.getWard();
-		mode = modee;
+		mode = mod;
 		initComponents();
 	}
 
@@ -265,21 +269,23 @@ public class InventoryWardEdit extends ModalJFrame {
 
 		if (mode.equals("view")) {
 			saveButton.setVisible(false);
+			validateButton.setVisible(false);
+			confirmButton.setVisible(false);
 			deleteButton.setVisible(false);
 			columnEditable = columnEditableView;
-			codeTextField.setEditable(false);
 			resetButton.setVisible(false);
 			referenceTextField.setVisible(false);
 			jCalendarInventory.setEnabled(false);
 			specificRadio.setEnabled(false);
 			allRadio.setEnabled(false);
 			wardComboBox.setEnabled(false);
-			validateButton.setVisible(false);
 			printButton.setVisible(true);
 			lotButton.setVisible(false);
-			confirmButton.setVisible(false);
+			codeTextField.setEditable(false);
+			
 		} else {
 			saveButton.setVisible(true);
+			validateButton.setVisible(true);
 			deleteButton.setVisible(true);
 			codeTextField.setEditable(true);
 			resetButton.setVisible(true);
@@ -288,14 +294,13 @@ public class InventoryWardEdit extends ModalJFrame {
 			specificRadio.setEnabled(true);
 			allRadio.setEnabled(true);
 			wardComboBox.setEnabled(true);
-			validateButton.setVisible(true);
-			printButton.setVisible(false);
 			lotButton.setVisible(true);
 			if (inventory != null && inventory.getStatus().equals(InventoryStatus.validated.toString())) {
 				confirmButton.setEnabled(true);
 			} else {
 				confirmButton.setEnabled(false);
 			}
+			printButton.setVisible(false);
 		}
 	}
 
@@ -409,9 +414,9 @@ public class InventoryWardEdit extends ModalJFrame {
 			panelFooter.add(getSaveButton());
 			panelFooter.add(getLotButton());
 			panelFooter.add(getDeleteButton());
+			panelFooter.add(getCleanTableButton());
 			panelFooter.add(getValidateButton());
 			panelFooter.add(getConfirmButton());
-			panelFooter.add(getCleanTableButton());
 			panelFooter.add(getPrintButton());
 			panelFooter.add(getCloseButton());
 		}
@@ -426,7 +431,9 @@ public class InventoryWardEdit extends ModalJFrame {
 				jCalendarInventory.setDate(inventory.getInventoryDate().toLocalDate());
 				dateInventory = inventory.getInventoryDate();
 			}
-			jCalendarInventory.addDateChangeListener(event -> dateInventory = jCalendarInventory.getDate().atStartOfDay());
+			jCalendarInventory.addDateChangeListener(event -> {
+				dateInventory = jCalendarInventory.getDate().atStartOfDay();
+			});
 		}
 		return jCalendarInventory;
 	}
@@ -435,7 +442,7 @@ public class InventoryWardEdit extends ModalJFrame {
 		saveButton = new JButton(MessageBundle.getMessage("angal.common.save.btn"));
 		saveButton.setMnemonic(MessageBundle.getMnemonic("angal.common.save.btn.key"));
 		saveButton.addActionListener(actionEvent -> {
-			String state = InventoryStatus.draft.toString();
+			String status = InventoryStatus.draft.toString();
 			String user = UserBrowsingManager.getCurrentUser();
 			if (inventoryRowSearchList == null || inventoryRowSearchList.isEmpty()) {
 				MessageDialog.error(null, "angal.inventory.cannotsaveinventorywithoutproducts.msg");
@@ -460,8 +467,7 @@ public class InventoryWardEdit extends ModalJFrame {
 				List<MedicalInventoryRow> newMedicalInventoryRows = new ArrayList<>();
 				if (mode.equals("new")) {
 					newReference = referenceTextField.getText().trim();
-					boolean refExist;
-					refExist = medicalInventoryManager.referenceExists(newReference);
+					boolean refExist = medicalInventoryManager.referenceExists(newReference);
 					if (refExist) {
 						MessageDialog.error(null, "angal.inventory.referencealreadyused.msg");
 						return;
@@ -469,7 +475,7 @@ public class InventoryWardEdit extends ModalJFrame {
 					inventory = new MedicalInventory();
 					inventory.setInventoryReference(newReference);
 					inventory.setInventoryDate(dateInventory);
-					inventory.setStatus(state);
+					inventory.setStatus(status);
 					inventory.setUser(user);
 					inventory.setInventoryType(InventoryType.ward.toString());
 					inventory.setWard(wardSelected != null ? wardSelected.getCode() : null);
@@ -960,10 +966,10 @@ public class InventoryWardEdit extends ModalJFrame {
 			jTextFieldEditor = new JTextField();
 			jTableInventoryRow.setFillsViewportHeight(true);
 			jTableInventoryRow.setModel(new InventoryRowModel());
-			for (int i = 0; i < pColumnVisible.length; i++) {
+			for (int i = 0; i < columnVisible.length; i++) {
 				jTableInventoryRow.getColumnModel().getColumn(i).setCellRenderer(new DefaultTableCellRenderer());
-				jTableInventoryRow.getColumnModel().getColumn(i).setPreferredWidth(pColumwidth[i]);
-				if (i == 0 || !pColumnVisible[i]) {
+				jTableInventoryRow.getColumnModel().getColumn(i).setPreferredWidth(columwidth[i]);
+				if (i == 0 || !columnVisible[i]) {
 					jTableInventoryRow.getColumnModel().getColumn(i).setMinWidth(0);
 					jTableInventoryRow.getColumnModel().getColumn(i).setMaxWidth(0);
 					jTableInventoryRow.getColumnModel().getColumn(i).setPreferredWidth(0);
@@ -1058,12 +1064,12 @@ public class InventoryWardEdit extends ModalJFrame {
 
 		@Override
 		public String getColumnName(int c) {
-			return pColums[c];
+			return columsNames[c];
 		}
 
 		@Override
 		public int getColumnCount() {
-			return pColums.length;
+			return columsNames.length;
 		}
 
 		@Override
@@ -1160,8 +1166,8 @@ public class InventoryWardEdit extends ModalJFrame {
 
 	private void adjustWidth() {
 		for (int i = 0; i < jTableInventoryRow.getColumnModel().getColumnCount(); i++) {
-			jTableInventoryRow.getColumnModel().getColumn(i).setPreferredWidth(pColumwidth[i]);
-			if (i == 0 || !pColumnVisible[i]) {
+			jTableInventoryRow.getColumnModel().getColumn(i).setPreferredWidth(columwidth[i]);
+			if (i == 0 || !columnVisible[i]) {
 				jTableInventoryRow.getColumnModel().getColumn(i).setMinWidth(0);
 				jTableInventoryRow.getColumnModel().getColumn(i).setMaxWidth(0);
 				jTableInventoryRow.getColumnModel().getColumn(i).setPreferredWidth(0);
