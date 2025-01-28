@@ -1541,8 +1541,7 @@ public class InventoryWardEdit extends ModalJFrame {
 
 				if (itemEvent.getStateChange() == ItemEvent.SELECTED) {
 					Object item = itemEvent.getItem();
-					if (item instanceof Ward) {
-						wardSelected = (Ward) item;
+					if (item instanceof Ward wardSelected) {
 						wardId = wardSelected.getCode();
 						List<MedicalInventory> medicalWardInventoryDraft;
 						List<MedicalInventory> medicalWardInventoryValidated;
