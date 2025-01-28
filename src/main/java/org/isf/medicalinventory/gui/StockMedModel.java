@@ -37,7 +37,7 @@ public class StockMedModel extends DefaultTableModel {
 	private List<Medical> medList;
 	private List<Medical> initList = new ArrayList<>();
 
-	public StockMedModel(ArrayList<Medical> meds) {
+	public StockMedModel(List<Medical> meds) {
 		medList = meds;
 		initList.addAll(medList);
 	}
