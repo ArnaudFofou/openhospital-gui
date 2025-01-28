@@ -75,8 +75,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.EventListenerList;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
@@ -305,6 +303,7 @@ public class InventoryEdit extends ModalJFrame {
 		getContentPane().add(panelFooter, BorderLayout.SOUTH);
 		addWindowListener(new WindowAdapter() {
 
+			@Override
 			public void windowClosing(WindowEvent e) {
 				closeButton.doClick();
 			}
@@ -1183,38 +1182,33 @@ public class InventoryEdit extends ModalJFrame {
 					jTableInventoryRow.getColumnModel().getColumn(i).setCellRenderer(new DecimalNumberTableCellRenderer());
 				}
 			}
-			jTableInventoryRow.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			jTableInventoryRow.getSelectionModel().addListSelectionListener(listSelectionEvent -> {
 
-				@Override
-				public void valueChanged(ListSelectionEvent e) {
-					if (e.getValueIsAdjusting()) {
-						int selectedRow = jTableInventoryRow.getSelectedRow();
-						if (selectedRow != -1) {
-							MedicalInventoryRow medInvRow = (MedicalInventoryRow) jTableInventoryRow.getValueAt(selectedRow, -1);
-							Lot lot = medInvRow.getLot();
-							if (lot == null) {
-								lotButton.setEnabled(true);
+				if (listSelectionEvent.getValueIsAdjusting()) {
+					int selectedRow = jTableInventoryRow.getSelectedRow();
+					if (selectedRow != -1) {
+						MedicalInventoryRow medInvRow = (MedicalInventoryRow) jTableInventoryRow.getValueAt(selectedRow, -1);
+						Lot lot = medInvRow.getLot();
+						if (lot == null) {
+							lotButton.setEnabled(true);
+						} else {
+							BigDecimal cost = lot.getCost() != null ? lot.getCost() : BigDecimal.ZERO;
+							if (isLotWithCost()) {
+								if (cost.doubleValue() == 0.00 || medInvRow.isNewLot()) {
+									lotButton.setEnabled(true);
+								} else {
+									lotButton.setEnabled(false);
+								}
 							} else {
-								BigDecimal cost = lot.getCost() != null ? lot.getCost() : BigDecimal.ZERO;
-								if (lot != null) {
-									if (isLotWithCost()) {
-										if (cost.doubleValue() == 0.00 || medInvRow.isNewLot()) {
-											lotButton.setEnabled(true);
-										} else {
-											lotButton.setEnabled(false);
-										}
-									} else {
-										if (medInvRow.isNewLot()) {
-											lotButton.setEnabled(true);
-										} else {
-											lotButton.setEnabled(false);
-										}
-									}
+								if (medInvRow.isNewLot()) {
+									lotButton.setEnabled(true);
+								} else {
+									lotButton.setEnabled(false);
 								}
 							}
-						} else {
-							lotButton.setEnabled(false);
 						}
+					} else {
+						lotButton.setEnabled(false);
 					}
 				}
 			});
@@ -1284,10 +1278,12 @@ public class InventoryEdit extends ModalJFrame {
 			}
 		}
 
+		@Override
 		public Class< ? > getColumnClass(int c) {
 			return columnsClasses[c];
 		}
 
+		@Override
 		public int getRowCount() {
 			if (inventoryRowSearchList == null) {
 				return 0;
@@ -1295,14 +1291,17 @@ public class InventoryEdit extends ModalJFrame {
 			return inventoryRowSearchList.size();
 		}
 
+		@Override
 		public String getColumnName(int c) {
 			return columsNames[c];
 		}
 
+		@Override
 		public int getColumnCount() {
 			return columsNames.length;
 		}
 
+		@Override
 		public Object getValueAt(int r, int c) {
 			if (r < inventoryRowSearchList.size()) {
 				MedicalInventoryRow medInvtRow = inventoryRowSearchList.get(r);
@@ -1367,7 +1366,6 @@ public class InventoryEdit extends ModalJFrame {
 						try {
 							intValue = Double.parseDouble(value.toString());
 						} catch (NumberFormatException e) {
-							intValue = 0.0;
 							return;
 						}
 					}
@@ -1571,7 +1569,7 @@ public class InventoryEdit extends ModalJFrame {
 			TextPrompt suggestion = new TextPrompt(MessageBundle.getMessage("angal.common.code.txt"), codeTextField, Show.FOCUS_LOST);
 			suggestion.setFont(new Font("Tahoma", Font.PLAIN, 12));
 			suggestion.setForeground(Color.GRAY);
-			suggestion.setHorizontalAlignment(JLabel.CENTER);
+			suggestion.setHorizontalAlignment(SwingConstants.CENTER);
 			suggestion.changeAlpha(0.5f);
 			suggestion.changeStyle(Font.BOLD + Font.ITALIC);
 			codeTextField.addKeyListener(new KeyAdapter() {
@@ -1598,7 +1596,7 @@ public class InventoryEdit extends ModalJFrame {
 	}
 
 	private List<MedicalInventoryRow> loadNewInventoryTable(String code, MedicalInventory inventory, boolean add) throws OHServiceException {
-		List<MedicalInventoryRow> inventoryRowsList = new ArrayList<>();
+		List<MedicalInventoryRow> inventoryRowsList;
 		if (inventory != null) {
 			int id = inventory.getId();
 			inventoryRowsList = medicalInventoryRowManager.getMedicalInventoryRowByInventoryId(id);
@@ -1789,11 +1787,9 @@ public class InventoryEdit extends ModalJFrame {
 	}
 
 	private Medical chooseMedical(String text) throws OHServiceException {
-		Map<String, Medical> medicalMap;
-		medicalMap = new HashMap<String, Medical>();
+		Map<String, Medical> medicalMap = new HashMap<>();
 		for (Medical med : medicals) {
-			String key = med.getProdCode().toLowerCase();
-			key = med.getCode().toString().toLowerCase();
+			String key = med.getCode().toString().toLowerCase();
 			medicalMap.put(key, med);
 		}
 		ArrayList<Medical> medList = new ArrayList<>();
@@ -1816,7 +1812,7 @@ public class InventoryEdit extends ModalJFrame {
 			framas.setParentFrame(dialog);
 			dialog.setContentPane(framas);
 			dialog.setVisible(true);
-			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 			med = framas.getSelectedMedical();
 			return med;
 		}
@@ -1905,7 +1901,7 @@ public class InventoryEdit extends ModalJFrame {
 	private JComboBox<MovementType> getJComboCharge() {
 		MovementType movementSelected = null;
 		if (chargeCombo == null) {
-			chargeCombo = new JComboBox<MovementType>();
+			chargeCombo = new JComboBox<>();
 			try {
 				List<MovementType> movementTypes = movTypeManager.getMedicalDsrStockMovementType();
 				chargeCombo.addItem(null);
@@ -1934,7 +1930,7 @@ public class InventoryEdit extends ModalJFrame {
 	private JComboBox<MovementType> getJComboDischarge() {
 		MovementType movementSelected = null;
 		if (dischargeCombo == null) {
-			dischargeCombo = new JComboBox<MovementType>();
+			dischargeCombo = new JComboBox<>();
 			try {
 				List<MovementType> movementTypes = movTypeManager.getMedicalDsrStockMovementType();
 				dischargeCombo.addItem(null);
@@ -1963,7 +1959,7 @@ public class InventoryEdit extends ModalJFrame {
 	private JComboBox<Supplier> getJComboSupplier() {
 		Supplier supplierSelected = null;
 		if (supplierCombo == null) {
-			supplierCombo = new JComboBox<Supplier>();
+			supplierCombo = new JComboBox<>();
 			try {
 				List<Supplier> suppliers = supplierManager.getList();
 				supplierCombo.addItem(null);
@@ -2196,10 +2192,7 @@ public class InventoryEdit extends ModalJFrame {
 		for (MedicalInventoryRow row : inventoryRowSearchList) {
 			inventorySet.add(row.getMedical());
 		}
-		if (medicals.size() == inventorySet.size()) {
-			return true;
-		}
-		return false;
+		return medicals.size() == inventorySet.size() ? true : false;
 	}
 
 	private void initializeActions() {
@@ -2256,6 +2249,7 @@ public class InventoryEdit extends ModalJFrame {
 
 		private static final long serialVersionUID = 1L;
 
+		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
 			JLabel lbl = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);

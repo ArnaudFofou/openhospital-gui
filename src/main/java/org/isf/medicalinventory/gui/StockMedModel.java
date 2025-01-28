@@ -23,6 +23,7 @@ package org.isf.medicalinventory.gui;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.table.DefaultTableModel;
 
@@ -33,13 +34,15 @@ import org.isf.utils.db.NormalizeString;
 public class StockMedModel extends DefaultTableModel {
 
 	private static final long serialVersionUID = 1L;
-	private ArrayList<Medical> medList;
-	private ArrayList<Medical> initList=new ArrayList<Medical>();
-	
+	private List<Medical> medList;
+	private List<Medical> initList = new ArrayList<>();
+
 	public StockMedModel(ArrayList<Medical> meds) {
 		medList = meds;
 		initList.addAll(medList);
 	}
+
+	@Override
 	public int getRowCount() {
 		if (medList == null) {
 			return 0;
@@ -47,6 +50,7 @@ public class StockMedModel extends DefaultTableModel {
 		return medList.size();
 	}
 
+	@Override
 	public String getColumnName(int c) {
 		if (c == 0) {
 			return MessageBundle.getMessage("angal.common.code.txt").toUpperCase();
@@ -57,10 +61,12 @@ public class StockMedModel extends DefaultTableModel {
 		return "";
 	}
 
+	@Override
 	public int getColumnCount() {
 		return 2;
 	}
 
+	@Override
 	public Object getValueAt(int r, int c) {
 		Medical med = medList.get(r);
 		if (c == -1) {
@@ -72,19 +78,20 @@ public class StockMedModel extends DefaultTableModel {
 		}
 		return null;
 	}
-	
+
 	public void filter(String searchValue) {
 		medList.clear();
 		for (Iterator<Medical> iterator = initList.iterator(); iterator.hasNext();) {
-			Medical med = (Medical) iterator.next();
+			Medical med = iterator.next();
 			if (med.getProdCode().trim().equalsIgnoreCase(searchValue.trim())) {
 				medList.add(med);
-			}
-			else if (NormalizeString.normalizeContains(med.getProdCode().toLowerCase().trim()+med.getDescription().toLowerCase(), searchValue.toLowerCase().trim())) {
+			} else if (NormalizeString.normalizeContains(med.getProdCode().toLowerCase().trim() + med.getDescription().toLowerCase(),
+				searchValue.toLowerCase().trim())) {
 				medList.add(med);
 			}
 		}
 	}
+
 	public Medical getMedicalAtRow(int row) {
 		if (medList.size() > row && row >= 0) {
 			return medList.get(row);
@@ -96,6 +103,5 @@ public class StockMedModel extends DefaultTableModel {
 	public boolean isCellEditable(int arg0, int arg1) {
 		return false;
 	}
-
 
 }
