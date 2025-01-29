@@ -133,7 +133,7 @@ public class InventoryEdit extends ModalJFrame {
 	public static void addInventoryListener(InventoryListener listener) {
 		InventoryListeners.add(InventoryListener.class, listener);
 	}
-	
+
 	public static void removeInventoryListener(InventoryListener listener) {
 		InventoryListeners.remove(InventoryListener.class, listener);
 	}
@@ -1750,7 +1750,7 @@ public class InventoryEdit extends ModalJFrame {
 				if (!existInInventorySearchList(inventoryRowTemp)) {
 					inventoryRowsList.add(inventoryRowTemp);
 				} else {
-					int info = MessageDialog.yesNo(null, "angal.inventory.productalreadyexist.msg", med.getDescription());
+					int info = MessageDialog.yesNo(null, "angal.inventory.productalreadyexist.ftm.msg", med.getDescription());
 					if (info == JOptionPane.YES_OPTION) {
 						inventoryRowsList.add(inventoryRowTemp);
 					}
@@ -1769,7 +1769,7 @@ public class InventoryEdit extends ModalJFrame {
 			}
 		}
 		if (medicalWithLot != null && numberOfMedicalWithoutSameLotAdded == 0) {
-			int info = MessageDialog.yesNo(null, "angal.inventory.productalreadyexist.msg", medicalWithLot.getDescription());
+			int info = MessageDialog.yesNo(null, "angal.inventory.productalreadyexist.fmt.msg", medicalWithLot.getDescription());
 			if (info == JOptionPane.YES_OPTION) {
 				inventoryRowTemp = new MedicalInventoryRow(0, 0.0, 0.0, null, medicalWithLot, null);
 				inventoryRowsList.add(inventoryRowTemp);
