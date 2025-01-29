@@ -182,8 +182,8 @@ public class InventoryWardEdit extends ModalJFrame {
 			MessageBundle.getMessage("angal.medicalstock.duedate.col").toUpperCase(),
 			MessageBundle.getMessage("angal.inventory.theoreticalqty.col").toUpperCase(),
 			MessageBundle.getMessage("angal.inventory.realqty.col").toUpperCase(),
-			MessageBundle.getMessage("angal.inventory.unitprice.col").toUpperCase(),
-			MessageBundle.getMessage("angal.inventory.totalprice.col").toUpperCase()
+			MessageBundle.getMessage("angal.inventory.unitcost.col").toUpperCase(),
+			MessageBundle.getMessage("angal.inventory.totalcost.col").toUpperCase()
 	};
 	private int[] columwidth = { 50, 50, 200, 100, 100, 100, 100, 80, 80, 80 };
 	private boolean[] columnEditable = { false, false, false, false, false, false, false, true, false, false };

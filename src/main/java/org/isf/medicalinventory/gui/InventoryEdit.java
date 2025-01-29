@@ -182,20 +182,21 @@ public class InventoryEdit extends ModalJFrame {
 	private DefaultTableModel model;
 	private List<MedicalInventoryRow> inventoryRowList;
 	private List<MedicalInventoryRow> inventoryRowSearchList = new ArrayList<>();
+	private List<MedicalInventoryRow> inventoryRowsToDelete = new ArrayList<>();
 	private List<MedicalInventoryRow> inventoryRowListAdded = new ArrayList<>();
 	private List<Lot> lotsSaved = new ArrayList<>();
 	private HashMap<Integer, Lot> lotsDeleted = new HashMap<>();
-	List<MedicalInventoryRow> inventoryRowsToDelete = new ArrayList<>();
 	private String[] columsNames = { MessageBundle.getMessage("angal.inventory.id.col").toUpperCase(),
 			MessageBundle.getMessage("angal.common.code.txt").toUpperCase(),
-			MessageBundle.getMessage("angal.inventory.product.col").toUpperCase(),
+			MessageBundle.getMessage("angal.inventory.medical.col").toUpperCase(),
 			MessageBundle.getMessage("angal.inventory.newlot.col").toUpperCase(),
-			MessageBundle.getMessage("angal.wardpharmacy.lotnumber.col").toUpperCase(),
+			MessageBundle.getMessage("angal.inventory.lotcode.col").toUpperCase(),
 			MessageBundle.getMessage("angal.medicalstock.duedate.col").toUpperCase(),
-			MessageBundle.getMessage("angal.inventory.theoreticqty.col").toUpperCase(),
-			MessageBundle.getMessage("angal.inventoryrow.realqty.col").toUpperCase(),
+			MessageBundle.getMessage("angal.inventory.theoreticalqty.col").toUpperCase(),
+			MessageBundle.getMessage("angal.inventory.realqty.col").toUpperCase(),
 			MessageBundle.getMessage("angal.inventory.unitcost.col").toUpperCase(),
-			MessageBundle.getMessage("angal.inventory.totalcost.col").toUpperCase() };
+			MessageBundle.getMessage("angal.inventory.totalcost.col").toUpperCase()
+	};
 	private int[] columwidth = { 50, 50, 200, 100, 100, 100, 100, 80, 80, 80 };
 	private boolean[] columnEditable = { false, false, false, false, false, false, false, true, false, false };
 	private boolean[] columnEditableView = { false, false, false, false, false, false, false, false, false, false };
