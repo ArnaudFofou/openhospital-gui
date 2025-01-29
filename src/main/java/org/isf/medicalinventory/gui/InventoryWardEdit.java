@@ -51,8 +51,6 @@ import java.util.Objects;
 
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultCellEditor;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -190,12 +188,16 @@ public class InventoryWardEdit extends ModalJFrame {
 	private boolean[] columnEditableView = { false, false, false, false, false, false, false, false, false, false };
 	private boolean[] columnVisible = { false, true, true, true, !GeneralData.AUTOMATICLOT_IN, true, true, true, GeneralData.LOTWITHCOST,
 			GeneralData.LOTWITHCOST };
+	private boolean[] columnCentered = { false, false, false, true, true, true, true, true, true, true };
+	private boolean[] columnDecimalNumber = { false, false, false, false, false, false, false, false, true, true };
+	private Class< ? >[] columnsClasses = { String.class, Integer.class, String.class, String.class, String.class, LocalDate.class, Integer.class,
+			Integer.class, BigDecimal.class, BigDecimal.class };
 	private final String[] lotSelectionColumnNames = {
 			MessageBundle.getMessage("angal.medicalstock.lotid").toUpperCase(),
 			MessageBundle.getMessage("angal.medicalstock.prepdate.col").toUpperCase(),
 			MessageBundle.getMessage("angal.medicalstock.duedate").toUpperCase()
 	};
-	private final Class[] lotSelectionColumnClasse = { String.class, String.class, String.class };
+	private final Class[] lotSelectionColumnClasses = { String.class, String.class, String.class };
 	private MedicalInventory inventory;
 	private JRadioButton specificRadio;
 	private JRadioButton allRadio;
@@ -326,11 +328,6 @@ public class InventoryWardEdit extends ModalJFrame {
 			gbc_wardComboBox.gridx = 1;
 			gbc_wardComboBox.gridy = 0;
 			panelHeader.add(getWardComboBox(), gbc_wardComboBox);
-			GridBagConstraints gbc_loaderLabel = new GridBagConstraints();
-			gbc_loaderLabel.insets = new Insets(0, 0, 5, 5);
-			gbc_loaderLabel.gridx = 2;
-			gbc_loaderLabel.gridy = 0;
-			panelHeader.add(getLoaderLabel(), gbc_loaderLabel);
 			GridBagConstraints gbc_dateInventoryLabel = new GridBagConstraints();
 			gbc_dateInventoryLabel.anchor = GridBagConstraints.EAST;
 			gbc_dateInventoryLabel.insets = new Insets(0, 0, 5, 5);
@@ -765,10 +762,10 @@ public class InventoryWardEdit extends ModalJFrame {
 		deleteButton.addActionListener(actionEvent -> {
 			int[] selectedRows = jTableInventoryRow.getSelectedRows();
 			if (selectedRows.length == 0) {
-				MessageDialog.error(this, "angal.inventory.pleaseselectatleastoneinventoryrow.msg");
+				MessageDialog.error(this, "angal.inventoryrow.pleaseselectatleastoneinventoryrow.msg");
 				return;
 			}
-			int delete = MessageDialog.yesNo(null, "angal.inventory.doyoureallywanttodeletethisinventoryrow.msg");
+			int delete = MessageDialog.yesNo(null, "angal.inventoryrow.doyoureallywanttodeletethisinventoryrow.msg");
 			if (delete == JOptionPane.YES_OPTION) {
 				if (selectedRows.length == inventoryRowSearchList.size()) {
 					resetButton.doClick();
@@ -806,7 +803,7 @@ public class InventoryWardEdit extends ModalJFrame {
 		lotButton.addActionListener(actionEvent -> {
 			int selectedRow = jTableInventoryRow.getSelectedRow();
 			if (selectedRow == -1) {
-				MessageDialog.error(this, "angal.inventory.pleaseselectonlyoneinventory.msg");
+				MessageDialog.error(this, "angal.inventoryrow.pleaseselectonlyoneinventoryrow.msg");
 				return;
 			}
 			MedicalInventoryRow selectedInventoryRow = (MedicalInventoryRow) jTableInventoryRow.getValueAt(selectedRow, -1);
@@ -1030,28 +1027,7 @@ public class InventoryWardEdit extends ModalJFrame {
 
 		@Override
 		public Class< ? > getColumnClass(int c) {
-			if (c == 0) {
-				return Integer.class;
-			} else if (c == 1) {
-				return String.class;
-			} else if (c == 2) {
-				return String.class;
-			} else if (c == 3) {
-				return String.class;
-			} else if (c == 4) {
-				return String.class;
-			} else if (c == 5) {
-				return String.class;
-			} else if (c == 6) {
-				return Double.class;
-			} else if (c == 7) {
-				return Integer.class;
-			} else if (c == 8) {
-				return Double.class;
-			} else if (c == 9) {
-				return Double.class;
-			}
-			return null;
+			return columnsClasses[c];
 		}
 
 		@Override
@@ -1076,7 +1052,6 @@ public class InventoryWardEdit extends ModalJFrame {
 		public Object getValueAt(int r, int c) {
 			if (r < inventoryRowSearchList.size()) {
 				MedicalInventoryRow medInvtRow = inventoryRowSearchList.get(r);
-
 				if (c == -1) {
 					return medInvtRow;
 				} else if (c == 0) {
@@ -1128,7 +1103,7 @@ public class InventoryWardEdit extends ModalJFrame {
 						}
 					}
 					if (intValue < 0) {
-						MessageDialog.error(null, "angal.inventory.invalidquantity.msg");
+						MessageDialog.error(null, "angal.inventoryrow.invalidquantity.msg");
 						return;
 					}
 
@@ -1296,7 +1271,7 @@ public class InventoryWardEdit extends ModalJFrame {
 
 	private JLabel getDateInventoryLabel() {
 		if (dateInventoryLabel == null) {
-			dateInventoryLabel = new JLabel(MessageBundle.getMessage("angal.inventory.date.label"));
+			dateInventoryLabel = new JLabel(MessageBundle.getMessage("angal.common.date.txt"));
 		}
 		return dateInventoryLabel;
 	}
@@ -1602,16 +1577,6 @@ public class InventoryWardEdit extends ModalJFrame {
 		lotButton.setEnabled(true);
 	}
 
-	private JLabel getLoaderLabel() {
-		if (loaderLabel == null) {
-			Icon icon = new ImageIcon("rsc/icons/oh_loader.GIF");
-			loaderLabel = new JLabel("");
-			loaderLabel.setIcon(icon);
-			loaderLabel.setVisible(false);
-		}
-		return loaderLabel;
-	}
-
 	private void addMedInRowInInventorySearchList(MedicalInventoryRow inventoryRow) {
 		int position = getPosition(inventoryRow);
 		if (position == -1) {
@@ -1778,7 +1743,7 @@ public class InventoryWardEdit extends ModalJFrame {
 
 		@Override
 		public Class< ? > getColumnClass(int columnIndex) {
-			return lotSelectionColumnClasse[columnIndex];
+			return lotSelectionColumnClasses[columnIndex];
 		}
 
 		public StockLotModel(List<Lot> lots) {

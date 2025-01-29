@@ -180,7 +180,7 @@ public class InventoryEdit extends ModalJFrame {
 	private JScrollPane scrollPaneInventory;
 	private JTable jTableInventoryRow;
 	private DefaultTableModel model;
-	private List<MedicalInventoryRow> inventoryRowList;
+	private List<MedicalInventoryRow> inventoryRowList = new ArrayList<>();
 	private List<MedicalInventoryRow> inventoryRowSearchList = new ArrayList<>();
 	private List<MedicalInventoryRow> inventoryRowsToDelete = new ArrayList<>();
 	private List<MedicalInventoryRow> inventoryRowListAdded = new ArrayList<>();
@@ -1825,7 +1825,7 @@ public class InventoryEdit extends ModalJFrame {
 
 	private JLabel getReferenceLabel() {
 		if (referenceLabel == null) {
-			referenceLabel = new JLabel(MessageBundle.getMessage("angal.common.reference.label"));
+			referenceLabel = new JLabel(MessageBundle.getMessage("angal.inventory.reference.label"));
 		}
 		return referenceLabel;
 	}
