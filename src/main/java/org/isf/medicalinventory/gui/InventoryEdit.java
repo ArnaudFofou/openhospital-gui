@@ -780,6 +780,173 @@ public class InventoryEdit extends ModalJFrame {
 		});
 		return saveButton;
 	}
+	
+	private JButton getValidateButton() {
+		validateButton = new JButton(MessageBundle.getMessage("angal.inventory.validate.btn"));
+		validateButton.setMnemonic(MessageBundle.getMnemonic("angal.inventory.validate.btn.key"));
+		if (inventory == null) {
+			validateButton.setEnabled(false);
+		}
+		validateButton.addActionListener(actionEvent -> {
+			if (inventory == null) {
+				MessageDialog.error(null, "angal.inventory.inventorymustsavebeforevalidation.msg");
+				return;
+			}
+			List<MedicalInventoryRow> invRowWithoutLot = inventoryRowSearchList.stream().filter(invRow -> invRow.getLot() == null).collect(Collectors.toList());
+			if (!invRowWithoutLot.isEmpty()) {
+				MessageDialog.error(null, "angal.inventory.allinventoryrowshouldhavelotbeforevalidation.msg");
+				return;
+			}
+			int reset = MessageDialog.yesNo(null, "angal.inventoryrow.doyoureallywanttovalidatethisinventory.msg");
+			if (reset == JOptionPane.YES_OPTION) {
+				if (inventoryRowSearchList == null || inventoryRowSearchList.isEmpty()) {
+					MessageDialog.error(null, "angal.inventory.cannotvalidateinventorywithoutproducts.msg");
+					return;
+				}
+				String chargeCode = inventory.getChargeType();
+				String dischargeCode = inventory.getDischargeType();
+				Integer supplierId = inventory.getSupplier();
+				String wardCode = inventory.getDestination();
+				String lastReference = inventory.getInventoryReference();
+				LocalDateTime lastDate = inventory.getInventoryDate();
+				List<MedicalInventoryRow> invRowWithoutRealQty = inventoryRowSearchList.stream().filter(invRow -> invRow.getRealQty() == 0 && invRow.isNewLot())
+					.collect(Collectors.toList());
+				if (!invRowWithoutRealQty.isEmpty()) {
+					MessageDialog.error(null, "angal.inventory.allinventoryrowswithnewlotshouldhaverealqtygreatterthanzero.msg");
+					return;
+				}
+				String errorMessage = this.checkParamsValues(chargeCode, dischargeCode, supplierId, wardCode);
+				if (errorMessage != null) {
+					MessageDialog.error(null, errorMessage);
+					return;
+				}
+				if (checkParameters(wardCode, chargeCode, dischargeCode, supplierId, lastReference, lastDate)) {
+					MessageDialog.error(null, "angal.inventory.pleasesaveinventorybeforevalidateit.msg");
+					return;
+				}
+				// validate inventory
+				try {
+					String status = InventoryStatus.validated.toString();
+					medicalInventoryManager.validateMedicalInventoryRow(inventory, inventoryRowSearchList);
+					inventory.setStatus(status);
+					inventory = medicalInventoryManager.updateMedicalInventory(inventory, true);
+					MessageDialog.info(null, "angal.inventory.validate.success.msg");
+					statusLabel.setText(status.toUpperCase());
+					statusLabel.setForeground(Color.BLUE);
+					confirmButton.setEnabled(true);
+					fireInventoryUpdated();
+				} catch (OHServiceException e) {
+					OHServiceExceptionUtil.showMessages(e);
+					int result = MessageDialog.yesNo(null, "angal.inventory.doyouwanttoactualizetheinventory.msg");
+					if (result == JOptionPane.YES_OPTION) {
+						try {
+							String status = InventoryStatus.validated.toString();
+							inventory.setStatus(status);
+							medicalInventoryManager.actualizeMedicalInventoryRow(inventory);
+							statusLabel.setText(status.toUpperCase());
+							statusLabel.setForeground(Color.BLUE);
+							confirmButton.setEnabled(true);
+							jTableInventoryRow.setModel(new InventoryRowModel());
+							fireInventoryUpdated();
+						} catch (OHServiceException e1) {
+							OHServiceExceptionUtil.showMessages(e1);
+						}
+					} else {
+						try {
+							inventory.setStatus(InventoryStatus.draft.toString());
+							statusLabel.setText(InventoryStatus.draft.toString().toUpperCase());
+							statusLabel.setForeground(Color.GRAY);
+							inventory = medicalInventoryManager.updateMedicalInventory(inventory, true);
+							fireInventoryUpdated();
+						} catch (OHServiceException ex) {
+							OHServiceExceptionUtil.showMessages(ex);
+						}
+					}
+				}
+			}
+		});
+		return validateButton;
+	}
+	
+	private JButton getConfirmButton() {
+		confirmButton = new JButton(MessageBundle.getMessage("angal.inventory.confirm.btn"));
+		confirmButton.setMnemonic(MessageBundle.getMnemonic("angal.inventory.confirm.btn.key"));
+		if (inventory == null) {
+			confirmButton.setEnabled(false);
+		}
+		confirmButton.addActionListener(actionEvent -> {
+			if (inventory == null) {
+				MessageDialog.error(null, "angal.inventory.inventorymustsavebeforevalidation.msg");
+				return;
+			}
+			List<MedicalInventoryRow> invRowWithoutLot = inventoryRowSearchList.stream().filter(invRow -> invRow.getLot() == null).collect(Collectors.toList());
+			if (!invRowWithoutLot.isEmpty()) {
+				MessageDialog.error(null, "angal.inventory.allinventoryrowshouldhavelotbeforevalidation.msg");
+				return;
+			}
+			int confirm = MessageDialog.yesNo(null, "angal.inventory.doyoureallywanttoconfirmthisinventory.msg");
+			if (confirm == JOptionPane.YES_OPTION) {
+				if (inventoryRowSearchList == null || inventoryRowSearchList.isEmpty()) {
+					MessageDialog.error(null, "angal.inventory.cannotconfirminventorywithoutproducts.msg");
+					return;
+				}
+				String dischargeCode = inventory.getDischargeType();
+				String chargeCode = inventory.getChargeType();
+				Integer supplierId = inventory.getSupplier();
+				String wardCode = inventory.getDestination();
+				String lastReference = inventory.getInventoryReference();
+				LocalDateTime lastDate = inventory.getInventoryDate();
+				List<MedicalInventoryRow> invRowWithoutRealQty = inventoryRowSearchList.stream().filter(invRow -> invRow.getRealQty() == 0 && invRow.isNewLot())
+					.collect(Collectors.toList());
+				if (!invRowWithoutRealQty.isEmpty()) {
+					MessageDialog.error(null, "angal.inventory.allinventoryrowswithnewlotshouldhaverealqtygreatterthanzero.msg");
+					return;
+				}
+				String errorMessage = this.checkParamsValues(chargeCode, dischargeCode, supplierId, wardCode);
+				if (errorMessage != null) {
+					MessageDialog.error(null, errorMessage);
+					return;
+				}
+				if (checkParameters(wardCode, chargeCode, dischargeCode, supplierId, lastReference, lastDate)) {
+					MessageDialog.error(null, "angal.inventory.pleasesaveinventorybeforeconfirmation.msg");
+					return;
+				}
+				// confirm inventory
+				try {
+					medicalInventoryManager.confirmMedicalInventoryRow(inventory, inventoryRowSearchList);
+					MessageDialog.info(null, "angal.inventory.confirm.success.msg");
+					fireInventoryUpdated();
+					closeButton.doClick();
+				} catch (OHServiceException e) {
+					OHServiceExceptionUtil.showMessages(e);
+					MessageDialog.info(null, "angal.inventory.pleasevalidateinventoryagainsbeforeconfirmation.msg");
+					confirmButton.setEnabled(false);
+					return;
+				}
+			}
+		});
+		return confirmButton;
+	}
+
+	private JButton getCleanTableButton() {
+		resetButton = new JButton(MessageBundle.getMessage("angal.inventory.clean.btn"));
+		resetButton.setMnemonic(MessageBundle.getMnemonic("angal.inventory.clean.btn.key"));
+		resetButton.addActionListener(actionEvent -> {
+			int reset = MessageDialog.yesNo(null, "angal.inventoryrow.doyoureallywanttocleanthistable.msg");
+			if (reset == JOptionPane.YES_OPTION) {
+				if (inventory != null) {
+					inventoryRowsToDelete.addAll(inventoryRowSearchList);
+				}
+				inventoryRowSearchList.clear();
+				DefaultTableModel model = (DefaultTableModel) jTableInventoryRow.getModel();
+				model.setRowCount(0);
+				model.setColumnCount(0);
+				jTableInventoryRow.updateUI();
+			}
+		});
+		return resetButton;
+	}
+
 	private JButton getDeleteButton() {
 		deleteButton = new JButton(MessageBundle.getMessage("angal.common.delete.btn"));
 		deleteButton.setMnemonic(MessageBundle.getMnemonic("angal.common.delete.btn.key"));
@@ -901,6 +1068,22 @@ public class InventoryEdit extends ModalJFrame {
 		return lotButton;
 	}
 
+	private JButton getPrintButton() {
+		printButton = new JButton(MessageBundle.getMessage("angal.common.print.btn"));
+		printButton.setMnemonic(MessageBundle.getMnemonic("angal.common.print.btn.key"));
+		printButton.setEnabled(true);
+
+		printButton.addActionListener(e -> {
+			int printRealQty = 0;
+			int response = MessageDialog.yesNo(this, "angal.inventory.askforrealquantityempty.msg");
+			if (response == JOptionPane.YES_OPTION) {
+				printRealQty = 1;
+			}
+			new GenericReportPharmaceuticalInventory(inventory, "Inventory", printRealQty);
+		});
+		return printButton;
+	}
+
 	private JButton getCloseButton() {
 		closeButton = new JButton(MessageBundle.getMessage("angal.common.close.btn"));
 		closeButton.setMnemonic(MessageBundle.getMnemonic("angal.common.close.btn.key"));
@@ -940,188 +1123,7 @@ public class InventoryEdit extends ModalJFrame {
 		return closeButton;
 	}
 
-	private JButton getPrintButton() {
-		printButton = new JButton(MessageBundle.getMessage("angal.common.print.btn"));
-		printButton.setMnemonic(MessageBundle.getMnemonic("angal.common.print.btn.key"));
-		printButton.setEnabled(true);
-
-		printButton.addActionListener(e -> {
-			int printRealQty = 0;
-			int response = MessageDialog.yesNo(this, "angal.inventory.askforrealquantityempty.msg");
-			if (response == JOptionPane.YES_OPTION) {
-				printRealQty = 1;
-			}
-			new GenericReportPharmaceuticalInventory(inventory, "Inventory", printRealQty);
-		});
-
-		return printButton;
-	}
-
-	private JButton getCleanTableButton() {
-		resetButton = new JButton(MessageBundle.getMessage("angal.inventory.clean.btn"));
-		resetButton.setMnemonic(MessageBundle.getMnemonic("angal.inventory.clean.btn.key"));
-		resetButton.addActionListener(actionEvent -> {
-			int reset = MessageDialog.yesNo(null, "angal.inventoryrow.doyoureallywanttocleanthistable.msg");
-			if (reset == JOptionPane.YES_OPTION) {
-				if (inventory != null) {
-					inventoryRowsToDelete.addAll(inventoryRowSearchList);
-				}
-				inventoryRowSearchList.clear();
-				DefaultTableModel model = (DefaultTableModel) jTableInventoryRow.getModel();
-				model.setRowCount(0);
-				model.setColumnCount(0);
-				jTableInventoryRow.updateUI();
-			}
-		});
-		return resetButton;
-	}
-
-	private JButton getValidateButton() {
-		validateButton = new JButton(MessageBundle.getMessage("angal.inventory.validate.btn"));
-		validateButton.setMnemonic(MessageBundle.getMnemonic("angal.inventory.validate.btn.key"));
-		if (inventory == null) {
-			validateButton.setEnabled(false);
-		}
-		validateButton.addActionListener(actionEvent -> {
-			if (inventory == null) {
-				MessageDialog.error(null, "angal.inventory.inventorymustsavebeforevalidation.msg");
-				return;
-			}
-			List<MedicalInventoryRow> invRowWithoutLot = inventoryRowSearchList.stream().filter(invRow -> invRow.getLot() == null).collect(Collectors.toList());
-			if (!invRowWithoutLot.isEmpty()) {
-				MessageDialog.error(null, "angal.inventory.allinventoryrowshouldhavelotbeforevalidation.msg");
-				return;
-			}
-			int reset = MessageDialog.yesNo(null, "angal.inventoryrow.doyoureallywanttovalidatethisinventory.msg");
-			if (reset == JOptionPane.YES_OPTION) {
-				if (inventoryRowSearchList == null || inventoryRowSearchList.isEmpty()) {
-					MessageDialog.error(null, "angal.inventory.cannotvalidateinventorywithoutproducts.msg");
-					return;
-				}
-				String chargeCode = inventory.getChargeType();
-				String dischargeCode = inventory.getDischargeType();
-				Integer supplierId = inventory.getSupplier();
-				String wardCode = inventory.getDestination();
-				String lastReference = inventory.getInventoryReference();
-				LocalDateTime lastDate = inventory.getInventoryDate();
-				List<MedicalInventoryRow> invRowWithoutRealQty = inventoryRowSearchList.stream().filter(invRow -> invRow.getRealQty() == 0 && invRow.isNewLot())
-					.collect(Collectors.toList());
-				if (!invRowWithoutRealQty.isEmpty()) {
-					MessageDialog.error(null, "angal.inventory.allinventoryrowswithnewlotshouldhaverealqtygreatterthanzero.msg");
-					return;
-				}
-				String errorMessage = this.checkParamsValues(chargeCode, dischargeCode, supplierId, wardCode);
-				if (errorMessage != null) {
-					MessageDialog.error(null, errorMessage);
-					return;
-				}
-				if (checkParameters(wardCode, chargeCode, dischargeCode, supplierId, lastReference, lastDate)) {
-					MessageDialog.error(null, "angal.inventory.pleasesaveinventorybeforevalidateit.msg");
-					return;
-				}
-				// validate inventory
-				try {
-					String status = InventoryStatus.validated.toString();
-					medicalInventoryManager.validateMedicalInventoryRow(inventory, inventoryRowSearchList);
-					inventory.setStatus(status);
-					inventory = medicalInventoryManager.updateMedicalInventory(inventory, true);
-					MessageDialog.info(null, "angal.inventory.validate.success.msg");
-					statusLabel.setText(status.toUpperCase());
-					statusLabel.setForeground(Color.BLUE);
-					confirmButton.setEnabled(true);
-					fireInventoryUpdated();
-				} catch (OHServiceException e) {
-					OHServiceExceptionUtil.showMessages(e);
-					int result = MessageDialog.yesNo(null, "angal.inventory.doyouwanttoactualizetheinventory.msg");
-					if (result == JOptionPane.YES_OPTION) {
-						try {
-							String status = InventoryStatus.validated.toString();
-							inventory.setStatus(status);
-							medicalInventoryManager.actualizeMedicalInventoryRow(inventory);
-							statusLabel.setText(status.toUpperCase());
-							statusLabel.setForeground(Color.BLUE);
-							confirmButton.setEnabled(true);
-							jTableInventoryRow.setModel(new InventoryRowModel());
-							fireInventoryUpdated();
-						} catch (OHServiceException e1) {
-							OHServiceExceptionUtil.showMessages(e1);
-						}
-					} else {
-						try {
-							inventory.setStatus(InventoryStatus.draft.toString());
-							statusLabel.setText(InventoryStatus.draft.toString().toUpperCase());
-							statusLabel.setForeground(Color.GRAY);
-							inventory = medicalInventoryManager.updateMedicalInventory(inventory, true);
-							fireInventoryUpdated();
-						} catch (OHServiceException ex) {
-							OHServiceExceptionUtil.showMessages(ex);
-						}
-					}
-				}
-			}
-		});
-		return validateButton;
-	}
-
-	private JButton getConfirmButton() {
-		confirmButton = new JButton(MessageBundle.getMessage("angal.inventory.confirm.btn"));
-		confirmButton.setMnemonic(MessageBundle.getMnemonic("angal.inventory.confirm.btn.key"));
-		if (inventory == null) {
-			confirmButton.setEnabled(false);
-		}
-		confirmButton.addActionListener(actionEvent -> {
-			if (inventory == null) {
-				MessageDialog.error(null, "angal.inventory.inventorymustsavebeforevalidation.msg");
-				return;
-			}
-			List<MedicalInventoryRow> invRowWithoutLot = inventoryRowSearchList.stream().filter(invRow -> invRow.getLot() == null).collect(Collectors.toList());
-			if (!invRowWithoutLot.isEmpty()) {
-				MessageDialog.error(null, "angal.inventory.allinventoryrowshouldhavelotbeforevalidation.msg");
-				return;
-			}
-			int confirm = MessageDialog.yesNo(null, "angal.inventory.doyoureallywanttoconfirmthisinventory.msg");
-			if (confirm == JOptionPane.YES_OPTION) {
-				if (inventoryRowSearchList == null || inventoryRowSearchList.isEmpty()) {
-					MessageDialog.error(null, "angal.inventory.cannotconfirminventorywithoutproducts.msg");
-					return;
-				}
-				String dischargeCode = inventory.getDischargeType();
-				String chargeCode = inventory.getChargeType();
-				Integer supplierId = inventory.getSupplier();
-				String wardCode = inventory.getDestination();
-				String lastReference = inventory.getInventoryReference();
-				LocalDateTime lastDate = inventory.getInventoryDate();
-				List<MedicalInventoryRow> invRowWithoutRealQty = inventoryRowSearchList.stream().filter(invRow -> invRow.getRealQty() == 0 && invRow.isNewLot())
-					.collect(Collectors.toList());
-				if (!invRowWithoutRealQty.isEmpty()) {
-					MessageDialog.error(null, "angal.inventory.allinventoryrowswithnewlotshouldhaverealqtygreatterthanzero.msg");
-					return;
-				}
-				String errorMessage = this.checkParamsValues(chargeCode, dischargeCode, supplierId, wardCode);
-				if (errorMessage != null) {
-					MessageDialog.error(null, errorMessage);
-					return;
-				}
-				if (checkParameters(wardCode, chargeCode, dischargeCode, supplierId, lastReference, lastDate)) {
-					MessageDialog.error(null, "angal.inventory.pleasesaveinventorybeforeconfirmation.msg");
-					return;
-				}
-				// confirm inventory
-				try {
-					medicalInventoryManager.confirmMedicalInventoryRow(inventory, inventoryRowSearchList);
-					MessageDialog.info(null, "angal.inventory.confirm.success.msg");
-					fireInventoryUpdated();
-					closeButton.doClick();
-				} catch (OHServiceException e) {
-					OHServiceExceptionUtil.showMessages(e);
-					MessageDialog.info(null, "angal.inventory.pleasevalidateinventoryagainsbeforeconfirmation.msg");
-					confirmButton.setEnabled(false);
-					return;
-				}
-			}
-		});
-		return confirmButton;
-	}
+	
 
 	private String checkParamsValues(String chargeCode, String dischargeCode, Integer supplierId, String wardCode) {
 		if (chargeCode == null || chargeCode.isEmpty()) {
@@ -1305,41 +1307,28 @@ public class InventoryEdit extends ModalJFrame {
 				} else if (c == 2) {
 					return medInvtRow.getMedical() == null ? "" : medInvtRow.getMedical().getDescription();
 				} else if (c == 3) {
-					if (medInvtRow.getLot() == null || medInvtRow.isNewLot()) {
-						return "N";
-					}
-					return "";
+					return medInvtRow.getLot() == null || medInvtRow.isNewLot() ? "N" : "";
 				} else if (c == 4) {
-					if (medInvtRow.getLot() == null) {
-						return "";
-					}
-					return medInvtRow.getLot().getCode().equals("") ? "AUTO" : medInvtRow.getLot().getCode();
+					return medInvtRow.getLot() == null ? "" : (medInvtRow.getLot().getCode().equals("") ? "AUTO" : medInvtRow.getLot().getCode());
 				} else if (c == 5) {
-					if (medInvtRow.getLot() != null) {
-						if (medInvtRow.getLot().getDueDate() != null) {
-							return medInvtRow.getLot().getDueDate().format(DATE_FORMATTER);
-						}
+					if (medInvtRow.getLot() != null && medInvtRow.getLot().getDueDate() != null) {
+						return medInvtRow.getLot().getDueDate().format(DATE_FORMATTER);
 					}
 					return "";
 				} else if (c == 6) {
-					Double dblVal = medInvtRow.getTheoreticQty();
-					return dblVal.intValue();
+					return medInvtRow.getTheoreticQty();
 				} else if (c == 7) {
-					Double dblValue = medInvtRow.getRealQty();
-					return dblValue.intValue();
+					double dblValue = medInvtRow.getRealQty();
+					return (int) dblValue;
 				} else if (c == 8) {
-					if (medInvtRow.getLot() != null) {
-						if (medInvtRow.getLot().getCost() != null) {
-							medInvtRow.setTotal(medInvtRow.getLot().getCost().multiply(BigDecimal.valueOf(medInvtRow.getRealQty())));
-							return medInvtRow.getLot().getCost();
-						}
+					if (medInvtRow.getLot() != null && medInvtRow.getLot().getCost() != null) {
+						medInvtRow.setTotal(medInvtRow.getLot().getCost().multiply(BigDecimal.valueOf(medInvtRow.getRealQty())));
+						return medInvtRow.getLot().getCost();
 					}
 					return BigDecimal.ZERO;
 				} else if (c == 9) {
-					if (medInvtRow.getLot() != null) {
-						if (medInvtRow.getLot().getCost() != null) {
-							return medInvtRow.getTotal();
-						}
+					if (medInvtRow.getLot() != null && medInvtRow.getLot().getCost() != null) {
+						return medInvtRow.getTotal();
 					}
 					return BigDecimal.ZERO;
 				}

@@ -1071,14 +1071,15 @@ public class InventoryWardEdit extends ModalJFrame {
 					return (int) dblValue;
 				} else if (c == 8) {
 					if (medInvtRow.getLot() != null && medInvtRow.getLot().getCost() != null) {
+						medInvtRow.setTotal(medInvtRow.getLot().getCost().multiply(BigDecimal.valueOf(medInvtRow.getRealQty())));
 						return medInvtRow.getLot().getCost();
 					}
-					return 0.0;
+					return BigDecimal.ZERO;
 				} else if (c == 9) {
 					if (medInvtRow.getLot() != null && medInvtRow.getLot().getCost() != null) {
-						return medInvtRow.getRealQty() * medInvtRow.getLot().getCost().doubleValue();
+						return medInvtRow.getTotal();
 					}
-					return 0.0;
+					return BigDecimal.ZERO;
 				}
 			}
 			return null;
