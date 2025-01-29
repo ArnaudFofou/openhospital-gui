@@ -426,7 +426,7 @@ public class InventoryWardEdit extends ModalJFrame {
 		}
 		return jCalendarInventory;
 	}
-	
+
 	private JButton getSaveButton() {
 		saveButton = new JButton(MessageBundle.getMessage("angal.common.save.btn"));
 		saveButton.setMnemonic(MessageBundle.getMnemonic("angal.common.save.btn.key"));
@@ -652,7 +652,6 @@ public class InventoryWardEdit extends ModalJFrame {
 							confirmButton.setEnabled(true);
 							jTableInventoryRow.setModel(new InventoryRowModel());
 							fireInventoryUpdated();
-							adjustWidth();
 						} catch (OHServiceException e1) {
 							OHServiceExceptionUtil.showMessages(e1);
 						}
@@ -738,7 +737,6 @@ public class InventoryWardEdit extends ModalJFrame {
 				model.setRowCount(0);
 				model.setColumnCount(0);
 				jTableInventoryRow.updateUI();
-				adjustWidth();
 			}
 		});
 		return resetButton;
@@ -779,7 +777,6 @@ public class InventoryWardEdit extends ModalJFrame {
 					}
 				}
 				jTableInventoryRow.clearSelection();
-				adjustWidth();
 			}
 		});
 		return deleteButton;
@@ -1135,20 +1132,6 @@ public class InventoryWardEdit extends ModalJFrame {
 		return inventoryRowsList;
 	}
 
-	private void adjustWidth() {
-		for (int i = 0; i < jTableInventoryRow.getColumnModel().getColumnCount(); i++) {
-			jTableInventoryRow.getColumnModel().getColumn(i).setPreferredWidth(columwidth[i]);
-			if (i == 0 || !columnVisible[i]) {
-				jTableInventoryRow.getColumnModel().getColumn(i).setMinWidth(0);
-				jTableInventoryRow.getColumnModel().getColumn(i).setMaxWidth(0);
-				jTableInventoryRow.getColumnModel().getColumn(i).setPreferredWidth(0);
-			}
-		}
-		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-		centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-		jTableInventoryRow.getColumnModel().getColumn(3).setCellRenderer(centerRenderer);
-	}
-
 	private List<MedicalInventoryRow> getMedicalInventoryRows(String code) throws OHServiceException {
 		List<MedicalInventoryRow> inventoryRowsList = new ArrayList<>();
 		List<MedicalWard> medicalWardList = new ArrayList<>();
@@ -1247,7 +1230,6 @@ public class InventoryWardEdit extends ModalJFrame {
 						}
 						fireInventoryUpdated();
 						code = null;
-						adjustWidth();
 					}
 				} else {
 					MessageDialog.info(null, "angal.inventory.youhavealreadyaddedallproduct.msg");
