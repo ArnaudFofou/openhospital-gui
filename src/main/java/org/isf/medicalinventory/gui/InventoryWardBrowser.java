@@ -121,7 +121,7 @@ public class InventoryWardBrowser extends ModalJFrame implements InventoryListen
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setMinimumSize(new Dimension(850, 550));
 		setLocationRelativeTo(null); // center
-		setTitle(MessageBundle.getMessage("angal.inventory.managementward.title"));
+		setTitle(MessageBundle.getMessage("angal.inventory.wardinventorybrowser.title"));
 
 		panelHeader = getPanelHeader();
 		getContentPane().add(panelHeader, BorderLayout.NORTH);
