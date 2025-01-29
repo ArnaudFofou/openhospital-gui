@@ -1746,7 +1746,7 @@ public class InventoryEdit extends ModalJFrame {
 				if (!existInInventorySearchList(inventoryRowTemp)) {
 					inventoryRowsList.add(inventoryRowTemp);
 				} else {
-					int info = MessageDialog.yesNo(null, "angal.inventory.productalreadyexist.ftm.msg", med.getDescription());
+					int info = MessageDialog.yesNo(null, "angal.inventory.productalreadyexist.fmt.msg", med.getDescription());
 					if (info == JOptionPane.YES_OPTION) {
 						inventoryRowsList.add(inventoryRowTemp);
 					}
