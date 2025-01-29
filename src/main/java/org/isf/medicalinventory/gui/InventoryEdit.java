@@ -2221,7 +2221,7 @@ public class InventoryEdit extends ModalJFrame {
 
 	private void showUpdateSuccessMessage() {
 		if (!inventoryRowList.isEmpty()) {
-			MessageDialog.info(null, "angal.invetory.tablehasbeenupdated.msg");
+			MessageDialog.info(null, "angal.inventory.tablehasbeenupdated.msg");
 		} else {
 			MessageDialog.info(null, "angal.inventory.notdataforthatfilter.msg");
 		}
