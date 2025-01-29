@@ -1268,7 +1268,7 @@ public class InventoryEdit extends ModalJFrame {
 				}
 			} else {
 				if (!mode.equals("new")) {
-					MessageDialog.info(null, "angal.invetory.notdataforthatfilter.msg");
+					MessageDialog.info(null, "angal.inventory.notdataforthatfilter.msg");
 				}
 			}
 		}
@@ -2223,7 +2223,7 @@ public class InventoryEdit extends ModalJFrame {
 		if (!inventoryRowList.isEmpty()) {
 			MessageDialog.info(null, "angal.invetory.tablehasbeenupdated.msg");
 		} else {
-			MessageDialog.info(null, "angal.invetory.notdataforthatfilter.msg");
+			MessageDialog.info(null, "angal.inventory.notdataforthatfilter.msg");
 		}
 	}
 

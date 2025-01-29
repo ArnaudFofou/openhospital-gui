@@ -1002,7 +1002,7 @@ public class InventoryWardEdit extends ModalJFrame {
 					addMedInRowInInventorySearchList(inventoryRow);
 				}
 				selectAll = true;
-				MessageDialog.info(null, "angal.invetory.allmedicaladdedsuccessfully.msg");
+				MessageDialog.info(null, "angal.inventory.allmedicaladdedsuccessfully.msg");
 			} else {
 				MessageDialog.info(null, "angal.inventory.youhavealreadyaddedallproduct.msg");
 			}
