@@ -25,6 +25,8 @@ import static org.isf.utils.Constants.DATE_TIME_FORMATTER;
 
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -48,6 +50,7 @@ import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import org.isf.generaldata.MessageBundle;
@@ -96,6 +99,7 @@ public class InventoryWardBrowser extends ModalJFrame implements InventoryListen
 	};
 	private int[] columwidth = { 150, 150, 100, 100, 150 };
 	private Class[] columnClasses = { String.class, String.class, String.class, String.class, String.class };
+	private boolean[] columnCentered = { false, true, true, true, true };
 	private JComboBox<String> statusComboBox;
 	private JLabel statusLabel;
 	private JButton next;
@@ -474,11 +478,30 @@ public class InventoryWardBrowser extends ModalJFrame implements InventoryListen
 			jTableInventory.setFillsViewportHeight(true);
 			jTableInventory.setModel(new InventoryBrowsingModel(0, PAGE_SIZE));
 			jTableInventory.setAutoCreateColumnsFromModel(false);
-			jTableInventory.getSelectionModel().addListSelectionListener(e -> {
-				if (e.getValueIsAdjusting()) {
+			for (int i = 0; i < columwidth.length; i++) {
+				jTableInventory.getColumnModel().getColumn(i).setMinWidth(columwidth[i]);
+				if (columnCentered[i]) {
+					jTableInventory.getColumnModel().getColumn(i).setCellRenderer(new ColorCenterTableCellRenderer());
+				} else {
+					jTableInventory.getColumnModel().getColumn(i).setCellRenderer(new ColorTableCellRenderer());
+				}
+			}
+			jTableInventory.getSelectionModel().addListSelectionListener(listSelectionEvent -> {
+
+				if (listSelectionEvent.getValueIsAdjusting()) {
 					int[] selectedRows = jTableInventory.getSelectedRows();
 					if (selectedRows.length == 1) {
-						jButtonEdit.setEnabled(true);
+						int selectedRow = jTableInventory.getSelectedRow();
+						MedicalInventory inventory = inventoryList.get(selectedRow);
+						if (inventory.getStatus().equals(InventoryStatus.canceled.toString()) ||
+							inventory.getStatus().equals(InventoryStatus.done.toString())) {
+							jButtonEdit.setEnabled(false);
+							jButtonDelete.setEnabled(false);
+						} else {
+							jButtonEdit.setEnabled(true);
+							jButtonDelete.setEnabled(true);
+
+						}
 						jButtonView.setEnabled(true);
 						jButtonDelete.setEnabled(true);
 					} else {
@@ -622,4 +645,39 @@ public class InventoryWardBrowser extends ModalJFrame implements InventoryListen
 		jTableInventory.setModel(new InventoryBrowsingModel(0, PAGE_SIZE));
 	}
 
+	class ColorTableCellRenderer extends DefaultTableCellRenderer {
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+
+			Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			formatCellByInventoryStatus(table, row, cell);
+			return cell;
+		}
+	}
+
+	class ColorCenterTableCellRenderer extends DefaultTableCellRenderer {
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+
+			Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			setHorizontalAlignment(CENTER);
+			formatCellByInventoryStatus(table, row, cell);
+			return cell;
+		}
+	}
+
+	private void formatCellByInventoryStatus(JTable table, int row, Component cell) {
+		int statusColumn = table.getColumnModel().getColumnIndex(MessageBundle.getMessage("angal.common.status.txt").toUpperCase());
+		if ((table.getValueAt(row, statusColumn)).equals(InventoryStatus.draft.toString())) {
+			cell.setForeground(Color.BLUE);
+		} else {
+			cell.setForeground(Color.BLACK);
+		}
+	}
 }

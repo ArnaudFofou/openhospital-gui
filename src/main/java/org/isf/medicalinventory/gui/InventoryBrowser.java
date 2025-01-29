@@ -499,7 +499,6 @@ public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 
 						}
 						jButtonView.setEnabled(true);
-						jButtonView.setEnabled(true);
 						jButtonDelete.setEnabled(true);
 					} else {
 						jButtonEdit.setEnabled(false);
@@ -641,7 +640,7 @@ public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
 			Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-			formatCellByBillStatus(table, row, cell);
+			formatCellByInventoryStatus(table, row, cell);
 			return cell;
 		}
 	}
@@ -655,12 +654,12 @@ public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 
 			Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 			setHorizontalAlignment(CENTER);
-			formatCellByBillStatus(table, row, cell);
+			formatCellByInventoryStatus(table, row, cell);
 			return cell;
 		}
 	}
 
-	private void formatCellByBillStatus(JTable table, int row, Component cell) {
+	private void formatCellByInventoryStatus(JTable table, int row, Component cell) {
 		int statusColumn = table.getColumnModel().getColumnIndex(MessageBundle.getMessage("angal.common.status.txt").toUpperCase());
 		if ((table.getValueAt(row, statusColumn)).equals(InventoryStatus.draft.toString())) {
 			cell.setForeground(Color.BLUE);
