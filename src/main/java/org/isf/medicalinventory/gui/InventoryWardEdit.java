@@ -27,6 +27,7 @@ import static org.isf.utils.Constants.DATE_TIME_FORMATTER;
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -48,8 +49,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
-import javax.swing.ButtonGroup;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -199,7 +200,7 @@ public class InventoryWardEdit extends ModalJFrame {
 	};
 	private final Class[] lotSelectionColumnClasses = { String.class, String.class, String.class };
 	private MedicalInventory inventory;
-	private JRadioButton specificRadio;
+	private JLabel specificRadio;
 	private JRadioButton allRadio;
 	private JLabel dateInventoryLabel;
 	private JTextField codeTextField;
@@ -213,7 +214,6 @@ public class InventoryWardEdit extends ModalJFrame {
 	private JLabel wardLabel;
 	private JComboBox<Ward> wardComboBox;
 	private Ward wardSelected;
-	private JLabel loaderLabel;
 	private boolean selectAll;
 	private String newReference;
 	private WardBrowserManager wardBrowserManager = Context.getApplicationContext().getBean(WardBrowserManager.class);
@@ -243,7 +243,7 @@ public class InventoryWardEdit extends ModalJFrame {
 	private void initComponents() {
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		setMinimumSize(new DimensionUIResource(950, 580));
-		setLocationRelativeTo(null); // center
+		setLocationRelativeTo(null);
 		if (mode.equals("update")) {
 			setTitle(MessageBundle.getMessage("angal.inventory.edit.title"));
 		} else if (mode.equals("view")) {
@@ -278,7 +278,6 @@ public class InventoryWardEdit extends ModalJFrame {
 			resetButton.setVisible(false);
 			referenceTextField.setVisible(false);
 			jCalendarInventory.setEnabled(false);
-			specificRadio.setEnabled(false);
 			allRadio.setEnabled(false);
 			wardComboBox.setEnabled(false);
 			printButton.setVisible(true);
@@ -293,7 +292,6 @@ public class InventoryWardEdit extends ModalJFrame {
 			resetButton.setVisible(true);
 			referenceTextField.setEditable(true);
 			jCalendarInventory.setEnabled(true);
-			specificRadio.setEnabled(true);
 			allRadio.setEnabled(true);
 			wardComboBox.setEnabled(true);
 			lotButton.setVisible(true);
@@ -379,10 +377,6 @@ public class InventoryWardEdit extends ModalJFrame {
 			gbc_allRadio.gridx = 2;
 			gbc_allRadio.gridy = 4;
 			panelHeader.add(getAllRadio(), gbc_allRadio);
-			ButtonGroup group = new ButtonGroup();
-			group.add(specificRadio);
-			group.add(allRadio);
-
 		}
 		return panelHeader;
 	}
@@ -434,7 +428,7 @@ public class InventoryWardEdit extends ModalJFrame {
 		}
 		return jCalendarInventory;
 	}
-
+	
 	private JButton getSaveButton() {
 		saveButton = new JButton(MessageBundle.getMessage("angal.common.save.btn"));
 		saveButton.setMnemonic(MessageBundle.getMnemonic("angal.common.save.btn.key"));
@@ -484,16 +478,13 @@ public class InventoryWardEdit extends ModalJFrame {
 						Medical medical = medicalInventoryRow.getMedical();
 						if (lot != null) {
 							lotCode = lot.getCode();
-							Lot lotExist;
-							lotExist = movStockInsertingManager.getLot(lotCode);
+							Lot lotExist = movStockInsertingManager.getLot(lotCode);
 							if (lotExist != null) {
-								Lot lotStore;
-								lotStore = movStockInsertingManager.updateLot(lot);
+								Lot lotStore = movStockInsertingManager.updateLot(lot);
 								medicalInventoryRow.setLot(lotStore);
 							} else {
 								if (lot.getDueDate() != null) {
-									Lot lotStore;
-									lotStore = movStockInsertingManager.storeLot(lotCode, lot, medical);
+									Lot lotStore = movStockInsertingManager.storeLot(lotCode, lot, medical);
 									medicalInventoryRow.setLot(lotStore);
 									medicalInventoryRow.setNewLot(true);
 								} else {
@@ -743,7 +734,6 @@ public class InventoryWardEdit extends ModalJFrame {
 					}
 				}
 				selectAll = false;
-				specificRadio.setSelected(true);
 				codeTextField.setEnabled(true);
 				inventoryRowSearchList.clear();
 				DefaultTableModel model = (DefaultTableModel) jTableInventoryRow.getModel();
@@ -854,9 +844,9 @@ public class InventoryWardEdit extends ModalJFrame {
 					}
 				} else {
 					List<MedicalInventoryRow> invRows = inventoryRowSearchList.stream()
-						.filter(inv -> inv.getMedical().getCode().equals(selectedInventoryRow.getMedical().getCode())).toList();
-					invRows = invRows.stream().filter(inv -> inv.getLot() != null && inv.getLot().getCode().equals(code)).toList();
-					if (invRows.isEmpty() || code.isEmpty()) {
+						.filter(inv -> inv.getMedical().getCode().equals(selectedInventoryRow.getMedical().getCode())).collect(Collectors.toList());
+					invRows = invRows.stream().filter(inv -> inv.getLot() != null && inv.getLot().getCode().equals(code)).collect(Collectors.toList());
+					if (invRows.isEmpty() || code.equals("")) {
 						selectedInventoryRow.setNewLot(true);
 						selectedInventoryRow.setLot(lot);
 						lotsSaved.add(lot);
@@ -963,6 +953,7 @@ public class InventoryWardEdit extends ModalJFrame {
 			jTextFieldEditor = new JTextField();
 			jTableInventoryRow.setFillsViewportHeight(true);
 			jTableInventoryRow.setModel(new InventoryRowModel());
+			jTableInventoryRow.setAutoCreateColumnsFromModel(false);
 			for (int i = 0; i < columnVisible.length; i++) {
 				jTableInventoryRow.getColumnModel().getColumn(i).setCellRenderer(new DefaultTableCellRenderer());
 				jTableInventoryRow.getColumnModel().getColumn(i).setPreferredWidth(columwidth[i]);
@@ -970,6 +961,12 @@ public class InventoryWardEdit extends ModalJFrame {
 					jTableInventoryRow.getColumnModel().getColumn(i).setMinWidth(0);
 					jTableInventoryRow.getColumnModel().getColumn(i).setMaxWidth(0);
 					jTableInventoryRow.getColumnModel().getColumn(i).setPreferredWidth(0);
+				}
+				if (columnCentered[i]) {
+					jTableInventoryRow.getColumnModel().getColumn(i).setCellRenderer(new CenterTableCellRenderer());
+				}
+				if (columnDecimalNumber[i]) {
+					jTableInventoryRow.getColumnModel().getColumn(i).setCellRenderer(new DecimalNumberTableCellRenderer());
 				}
 			}
 			DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
@@ -1200,16 +1197,9 @@ public class InventoryWardEdit extends ModalJFrame {
 		return found;
 	}
 
-	private JRadioButton getSpecificRadio() {
+	private JLabel getSpecificRadio() {
 		if (specificRadio == null) {
-			specificRadio = new JRadioButton(MessageBundle.getMessage("angal.inventory.specificproduct.btn"));
-			specificRadio.addActionListener(actionEvent -> {
-				if (specificRadio.isSelected()) {
-					codeTextField.setEnabled(true);
-					codeTextField.setText("");
-					allRadio.setSelected(false);
-				}
-			});
+			specificRadio = new JLabel(MessageBundle.getMessage("angal.inventory.specificproduct.btn"));
 		}
 		return specificRadio;
 	}
@@ -1218,7 +1208,6 @@ public class InventoryWardEdit extends ModalJFrame {
 		if (allRadio == null) {
 			allRadio = new JRadioButton(MessageBundle.getMessage("angal.inventory.allproduct.btn"));
 			allRadio.setSelected(inventory != null);
-			specificRadio.setSelected(inventory == null);
 			allRadio.addActionListener(actionEvent -> {
 				if (!selectAll) {
 					if (allRadio.isSelected()) {
@@ -1844,5 +1833,36 @@ public class InventoryWardEdit extends ModalJFrame {
 		} while (row == -1);
 
 		return selectedLot;
+	}
+
+	class CenterTableCellRenderer extends DefaultTableCellRenderer {
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+
+			Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			setHorizontalAlignment(CENTER);
+			return cell;
+		}
+	}
+
+	public class DecimalNumberTableCellRenderer extends DefaultTableCellRenderer {
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+
+			JLabel lbl = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			if (value instanceof BigDecimal) {
+				lbl.setText(String.format("%.02f", value));
+			}
+			lbl.setOpaque(true);
+			lbl.setBackground(Color.WHITE);
+			setHorizontalAlignment(CENTER);
+			return lbl;
+		}
 	}
 }

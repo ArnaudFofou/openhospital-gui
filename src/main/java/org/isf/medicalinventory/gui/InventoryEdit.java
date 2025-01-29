@@ -314,7 +314,6 @@ public class InventoryEdit extends ModalJFrame {
 			resetButton.setVisible(false);
 			referenceTextField.setEditable(false);
 			jCalendarInventory.setEnabled(false);
-			specificRadio.setEnabled(false);
 			chargeCombo.setEnabled(false);
 			dischargeCombo.setEnabled(false);
 			supplierCombo.setEnabled(false);
@@ -331,7 +330,6 @@ public class InventoryEdit extends ModalJFrame {
 			resetButton.setVisible(true);
 			referenceTextField.setEditable(true);
 			jCalendarInventory.setEnabled(true);
-			specificRadio.setEnabled(true);
 			chargeCombo.setEnabled(true);
 			dischargeCombo.setEnabled(true);
 			supplierCombo.setEnabled(true);
@@ -574,6 +572,7 @@ public class InventoryEdit extends ModalJFrame {
 		}
 		return selectButton;
 	}
+
 	private JButton getSaveButton() {
 		saveButton = new JButton(MessageBundle.getMessage("angal.common.save.btn"));
 		saveButton.setMnemonic(MessageBundle.getMnemonic("angal.common.save.btn.key"));
@@ -601,8 +600,8 @@ public class InventoryEdit extends ModalJFrame {
 				if (mode.equals("new")) {
 					newReference = referenceTextField.getText().trim();
 					boolean refExist = medicalInventoryManager.referenceExists(newReference);
-					boolean referenceExistonMovementStock = movStockInsertingManager.refNoExists(newReference);
-					if (refExist || referenceExistonMovementStock) {
+					boolean referenceExistInMovementStock = movStockInsertingManager.refNoExists(newReference);
+					if (refExist || referenceExistInMovementStock) {
 						MessageDialog.error(null, "angal.inventory.referencealreadyused.msg");
 						return;
 					}
@@ -625,16 +624,13 @@ public class InventoryEdit extends ModalJFrame {
 						Medical medical = medicalInventoryRow.getMedical();
 						if (lot != null) {
 							lotCode = lot.getCode();
-							Lot lotExist = null;
-							lotExist = movStockInsertingManager.getLot(lotCode);
+							Lot lotExist = movStockInsertingManager.getLot(lotCode);
 							if (lotExist != null) {
-								Lot lotStore = null;
-								lotStore = movStockInsertingManager.updateLot(lot);
+								Lot lotStore = movStockInsertingManager.updateLot(lot);
 								medicalInventoryRow.setLot(lotStore);
 							} else {
 								if (lot.getDueDate() != null) {
-									Lot lotStore = null;
-									lotStore = movStockInsertingManager.storeLot(lotCode, lot, medical);
+									Lot lotStore = movStockInsertingManager.storeLot(lotCode, lot, medical);
 									medicalInventoryRow.setLot(lotStore);
 									medicalInventoryRow.setNewLot(true);
 								} else {
@@ -830,7 +826,7 @@ public class InventoryEdit extends ModalJFrame {
 		lotButton.addActionListener(actionEvent -> {
 			int selectedRow = jTableInventoryRow.getSelectedRow();
 			if (selectedRow == -1) {
-				MessageDialog.error(this, "angal.inventoryrow.pleaseselectoneinventoryrow.msg");
+				MessageDialog.error(this, "angal.inventoryrow.pleaseselectonlyoneinventoryrow.msg");
 				return;
 			}
 			MedicalInventoryRow selectedInventoryRow = (MedicalInventoryRow) jTableInventoryRow.getValueAt(selectedRow, -1);
@@ -857,7 +853,6 @@ public class InventoryEdit extends ModalJFrame {
 						}
 					}
 				}
-
 			} catch (OHServiceException e) {
 				OHServiceExceptionUtil.showMessages(e);
 				return;
@@ -866,8 +861,8 @@ public class InventoryEdit extends ModalJFrame {
 				code = lot.getCode();
 				if (selectedInventoryRow.getLot() == null) {
 					List<MedicalInventoryRow> invRows = inventoryRowSearchList.stream()
-						.filter(inv -> inv.getLot() != null && inv.getLot().getCode().equals(code)).collect(Collectors.toList());
-					if (invRows.isEmpty() || code.equals("")) {
+						.filter(inv -> inv.getLot() != null && inv.getLot().getCode().equals(code)).toList();
+					if (invRows.isEmpty() || code.isEmpty()) {
 						selectedInventoryRow.setNewLot(true);
 						selectedInventoryRow.setLot(lot);
 						lotsSaved.add(lot);
