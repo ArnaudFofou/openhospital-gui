@@ -780,7 +780,7 @@ public class InventoryEdit extends ModalJFrame {
 		});
 		return saveButton;
 	}
-	
+
 	private JButton getValidateButton() {
 		validateButton = new JButton(MessageBundle.getMessage("angal.inventory.validate.btn"));
 		validateButton.setMnemonic(MessageBundle.getMnemonic("angal.inventory.validate.btn.key"));
@@ -867,7 +867,7 @@ public class InventoryEdit extends ModalJFrame {
 		});
 		return validateButton;
 	}
-	
+
 	private JButton getConfirmButton() {
 		confirmButton = new JButton(MessageBundle.getMessage("angal.inventory.confirm.btn"));
 		confirmButton.setMnemonic(MessageBundle.getMnemonic("angal.inventory.confirm.btn.key"));
@@ -1123,8 +1123,6 @@ public class InventoryEdit extends ModalJFrame {
 		return closeButton;
 	}
 
-	
-
 	private String checkParamsValues(String chargeCode, String dischargeCode, Integer supplierId, String wardCode) {
 		if (chargeCode == null || chargeCode.isEmpty()) {
 			return "angal.inventory.choosechargetypebeforevalidation.msg";
@@ -1341,31 +1339,28 @@ public class InventoryEdit extends ModalJFrame {
 			if (r < inventoryRowSearchList.size()) {
 				MedicalInventoryRow invRow = inventoryRowSearchList.get(r);
 				if (c == 7) {
-					Double intValue = 0.0;
+					double doubleValue = 0.0;
 					if (value != null) {
 						try {
-							intValue = Double.parseDouble(value.toString());
+							doubleValue = Double.parseDouble(value.toString());
 						} catch (NumberFormatException e) {
 							return;
 						}
 					}
-					if (intValue < 0) {
+					if (doubleValue < 0) {
 						MessageDialog.error(null, "angal.inventoryrow.invalidquantity.msg");
 						return;
 					}
-					invRow.setRealqty(intValue);
+					invRow.setRealqty(doubleValue);
 					if (invRow.getLot() != null && invRow.getLot().getCost() != null) {
 						BigDecimal total = invRow.getLot().getCost().multiply(BigDecimal.valueOf(invRow.getRealQty()));
 						invRow.setTotal(total);
 					}
 					inventoryRowListAdded.add(invRow);
 					inventoryRowSearchList.set(r, invRow);
-					SwingUtilities.invokeLater(() -> {
-						jTableInventoryRow.updateUI();
-					});
+					SwingUtilities.invokeLater(() -> jTableInventoryRow.updateUI());
 				}
 			}
-
 		}
 
 		@Override
@@ -1772,7 +1767,7 @@ public class InventoryEdit extends ModalJFrame {
 			String key = med.getCode().toString().toLowerCase();
 			medicalMap.put(key, med);
 		}
-		ArrayList<Medical> medList = new ArrayList<>();
+		List<Medical> medList = new ArrayList<>();
 		for (Medical aMed : medicalMap.values()) {
 			if (NormalizeString.normalizeContains(aMed.getDescription().toLowerCase(), text)) {
 				medList.add(aMed);
@@ -1788,23 +1783,14 @@ public class InventoryEdit extends ModalJFrame {
 			dialog.setSize(600, 350);
 			dialog.setLocationRelativeTo(null);
 			dialog.setModal(true);
-			dialog.setTitle(MessageBundle.getMessage("angal.medicalstock.multiplecharging.selectmedical.title"));
+			dialog.setTitle(MessageBundle.getMessage("angal.medicalstock.multiplecharging.chooseamedical"));
 			framas.setParentFrame(dialog);
 			dialog.setContentPane(framas);
 			dialog.setVisible(true);
 			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 			med = framas.getSelectedMedical();
-			return med;
 		}
-		return null;
-	}
-
-	public EventListenerList getInventoryListeners() {
-		return InventoryListeners;
-	}
-
-	public void setInventoryListeners(EventListenerList inventoryListeners) {
-		InventoryListeners = inventoryListeners;
+		return med;
 	}
 
 	private JLabel getReferenceLabel() {
@@ -1812,6 +1798,17 @@ public class InventoryEdit extends ModalJFrame {
 			referenceLabel = new JLabel(MessageBundle.getMessage("angal.inventory.reference.label"));
 		}
 		return referenceLabel;
+	}
+
+	private JTextField getReferenceTextField() {
+		if (referenceTextField == null) {
+			referenceTextField = new JTextField();
+			referenceTextField.setColumns(10);
+			if (inventory != null && !mode.equals("new")) {
+				referenceTextField.setText(inventory.getInventoryReference());
+			}
+		}
+		return referenceTextField;
 	}
 
 	private JLabel getStatusLabel() {
@@ -1988,17 +1985,6 @@ public class InventoryEdit extends ModalJFrame {
 			});
 		}
 		return destinationCombo;
-	}
-
-	private JTextField getReferenceTextField() {
-		if (referenceTextField == null) {
-			referenceTextField = new JTextField();
-			referenceTextField.setColumns(10);
-			if (inventory != null && !mode.equals("new")) {
-				referenceTextField.setText(inventory.getInventoryReference());
-			}
-		}
-		return referenceTextField;
 	}
 
 	private int getPosition(MedicalInventoryRow inventoryRow) {

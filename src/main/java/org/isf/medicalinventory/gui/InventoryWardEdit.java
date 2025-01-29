@@ -21,8 +21,7 @@
  */
 package org.isf.medicalinventory.gui;
 
-import static org.isf.utils.Constants.DATE_FORMAT_DD_MM_YYYY;
-import static org.isf.utils.Constants.DATE_TIME_FORMATTER;
+import static org.isf.utils.Constants.DATE_FORMATTER;
 
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
@@ -1058,7 +1057,7 @@ public class InventoryWardEdit extends ModalJFrame {
 					return medInvtRow.getLot() == null ? "" : (medInvtRow.getLot().getCode().equals("") ? "AUTO" : medInvtRow.getLot().getCode());
 				} else if (c == 5) {
 					if (medInvtRow.getLot() != null && medInvtRow.getLot().getDueDate() != null) {
-						return medInvtRow.getLot().getDueDate().format(DATE_TIME_FORMATTER);
+						return medInvtRow.getLot().getDueDate().format(DATE_FORMATTER);
 					}
 					return "";
 				} else if (c == 6) {
@@ -1087,20 +1086,19 @@ public class InventoryWardEdit extends ModalJFrame {
 			if (r < inventoryRowSearchList.size()) {
 				MedicalInventoryRow invRow = inventoryRowSearchList.get(r);
 				if (c == 7) {
-					int intValue = 0;
+					double doubleValue = 0.0;
 					if (value != null) {
 						try {
-							intValue = Integer.parseInt(value.toString());
+							doubleValue = Double.parseDouble(value.toString());
 						} catch (NumberFormatException e) {
 							return;
 						}
 					}
-					if (intValue < 0) {
+					if (doubleValue < 0) {
 						MessageDialog.error(null, "angal.inventoryrow.invalidquantity.msg");
 						return;
 					}
-
-					invRow.setRealqty(intValue);
+					invRow.setRealqty(doubleValue);
 					if (invRow.getLot() != null && invRow.getLot().getCost() != null) {
 						BigDecimal total = invRow.getLot().getCost().multiply(BigDecimal.valueOf(invRow.getRealQty()));
 						invRow.setTotal(total);
@@ -1374,13 +1372,10 @@ public class InventoryWardEdit extends ModalJFrame {
 	}
 
 	private Medical chooseMedical(String text) throws OHServiceException {
-		Map<String, Medical> medicalMap;
+		Map<String, Medical> medicalMap = new HashMap<>();
 		List<Medical> medicals = medicalBrowsingManager.getMedicals();
-
-		medicalMap = new HashMap<>();
 		for (Medical med : medicals) {
-			String key;
-			key = med.getCode().toString().toLowerCase();
+			String key = med.getCode().toString().toLowerCase();
 			medicalMap.put(key, med);
 		}
 		List<Medical> medList = new ArrayList<>();
@@ -1390,7 +1385,7 @@ public class InventoryWardEdit extends ModalJFrame {
 			}
 		}
 		Collections.sort(medList);
-		Medical med;
+		Medical med = null;
 		if (!medList.isEmpty()) {
 			MedicalPicker framas = new MedicalPicker(new StockMedModel(medList), medList);
 			framas.setSize(300, 400);
@@ -1405,9 +1400,8 @@ public class InventoryWardEdit extends ModalJFrame {
 			dialog.setVisible(true);
 			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 			med = framas.getSelectedMedical();
-			return med;
 		}
-		return null;
+		return med;
 	}
 
 	private JLabel getReferenceLabel() {
@@ -1747,9 +1741,9 @@ public class InventoryWardEdit extends ModalJFrame {
 			} else if (c == ++i) {
 				return lot.getCode();
 			} else if (c == ++i) {
-				return TimeTools.formatDateTime(lot.getPreparationDate(), DATE_FORMAT_DD_MM_YYYY);
+				return lot.getPreparationDate().format(DATE_FORMATTER);
 			} else if (c == ++i) {
-				return TimeTools.formatDateTime(lot.getDueDate(), DATE_FORMAT_DD_MM_YYYY);
+				return lot.getDueDate().format(DATE_FORMATTER);
 			}
 			return null;
 		}
