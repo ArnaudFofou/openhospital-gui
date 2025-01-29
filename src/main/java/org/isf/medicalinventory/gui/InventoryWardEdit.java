@@ -244,23 +244,22 @@ public class InventoryWardEdit extends ModalJFrame {
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		setMinimumSize(new DimensionUIResource(950, 580));
 		setLocationRelativeTo(null);
-		if (mode.equals("update")) {
-			setTitle(MessageBundle.getMessage("angal.inventory.edit.title"));
-		} else if (mode.equals("view")) {
-			setTitle(MessageBundle.getMessage("angal.inventory.view.title"));
-		} else {
-			setTitle(MessageBundle.getMessage("angal.inventory.new.title"));
+		if (mode.equals("new")) {
+			setTitle(MessageBundle.getMessage("angal.inventory.newinventory.title"));
 		}
-
+		if (mode.equals("view")) {
+			setTitle(MessageBundle.getMessage("angal.inventory.viewinventory.title"));
+		}
+		if (mode.equals("update")) {
+			setTitle(MessageBundle.getMessage("angal.inventory.editinventory.title"));
+		}
+		getContentPane().setLayout(new BorderLayout());
 		panelHeader = getPanelHeader();
 		getContentPane().add(panelHeader, BorderLayout.NORTH);
-
 		panelContent = getPanelContent();
 		getContentPane().add(panelContent, BorderLayout.CENTER);
-
 		panelFooter = getPanelFooter();
 		getContentPane().add(panelFooter, BorderLayout.SOUTH);
-
 		addWindowListener(new WindowAdapter() {
 
 			@Override
@@ -268,7 +267,6 @@ public class InventoryWardEdit extends ModalJFrame {
 				closeButton.doClick();
 			}
 		});
-
 		if (mode.equals("view")) {
 			saveButton.setVisible(false);
 			validateButton.setVisible(false);
