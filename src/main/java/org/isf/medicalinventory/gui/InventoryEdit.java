@@ -783,9 +783,7 @@ public class InventoryEdit extends ModalJFrame {
 	private JButton getValidateButton() {
 		validateButton = new JButton(MessageBundle.getMessage("angal.inventory.validate.btn"));
 		validateButton.setMnemonic(MessageBundle.getMnemonic("angal.inventory.validate.btn.key"));
-		if (inventory == null) {
-			validateButton.setEnabled(false);
-		}
+		validateButton.setEnabled(inventory != null);
 		validateButton.addActionListener(actionEvent -> {
 			if (inventory == null) {
 				MessageDialog.error(null, "angal.inventory.inventorymustsavebeforevalidation.msg");
@@ -824,8 +822,8 @@ public class InventoryEdit extends ModalJFrame {
 					return;
 				}
 				// validate inventory
+				String status = InventoryStatus.validated.toString();
 				try {
-					String status = InventoryStatus.validated.toString();
 					medicalInventoryManager.validateMedicalInventoryRow(inventory, inventoryRowSearchList);
 					inventory.setStatus(status);
 					inventory = medicalInventoryManager.updateMedicalInventory(inventory, true);
@@ -836,10 +834,9 @@ public class InventoryEdit extends ModalJFrame {
 					fireInventoryUpdated();
 				} catch (OHServiceException e) {
 					OHServiceExceptionUtil.showMessages(e);
-					int result = MessageDialog.yesNo(null, "angal.inventory.doyouwanttoactualizetheinventory.msg");
-					if (result == JOptionPane.YES_OPTION) {
+					int answer = MessageDialog.yesNo(null, "angal.inventory.doyouwanttoactualizetheinventory.msg");
+					if (answer == JOptionPane.YES_OPTION) {
 						try {
-							String status = InventoryStatus.validated.toString();
 							inventory.setStatus(status);
 							medicalInventoryManager.actualizeMedicalInventoryRow(inventory);
 							statusLabel.setText(status.toUpperCase());
@@ -968,14 +965,15 @@ public class InventoryEdit extends ModalJFrame {
 						model.fireTableDataChanged();
 						jTableInventoryRow.setModel(model);
 					}
-
 				} else {
 					for (int i = selectedRows.length - 1; i >= 0; i--) {
 						MedicalInventoryRow inventoryRow = (MedicalInventoryRow) jTableInventoryRow.getValueAt(selectedRows[i], -1);
 						inventoryRowSearchList.remove(inventoryRow);
-						inventoryRowsToDelete.add(inventoryRow);
 						model.fireTableDataChanged();
 						jTableInventoryRow.setModel(model);
+						if (inventoryRow.getId() != 0) {
+							inventoryRowsToDelete.add(inventoryRow);
+						}
 					}
 				}
 				jTableInventoryRow.clearSelection();

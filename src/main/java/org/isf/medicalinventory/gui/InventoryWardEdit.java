@@ -654,7 +654,6 @@ public class InventoryWardEdit extends ModalJFrame {
 	}
 
 	private JButton getValidateButton() {
-
 		validateButton = new JButton(MessageBundle.getMessage("angal.inventory.validate.btn"));
 		validateButton.setMnemonic(MessageBundle.getMnemonic("angal.inventory.validate.btn.key"));
 		validateButton.setEnabled(inventory != null);
@@ -716,7 +715,6 @@ public class InventoryWardEdit extends ModalJFrame {
 						} catch (OHServiceException ex) {
 							OHServiceExceptionUtil.showMessages(ex);
 						}
-
 					}
 				}
 			}
@@ -735,8 +733,8 @@ public class InventoryWardEdit extends ModalJFrame {
 				MessageDialog.error(null, "angal.inventory.inventorymustsavebeforevalidation.msg");
 				return;
 			}
-			int reset = MessageDialog.yesNo(null, "angal.inventory.doyoureallywanttoconfirmthisinventory.msg");
-			if (reset == JOptionPane.YES_OPTION) {
+			int confirm = MessageDialog.yesNo(null, "angal.inventory.doyoureallywanttoconfirmthisinventory.msg");
+			if (confirm == JOptionPane.YES_OPTION) {
 				newReference = referenceTextField.getText().trim();
 				String lastReference = inventory.getInventoryReference();
 				LocalDateTime lastDate = inventory.getInventoryDate();
@@ -762,6 +760,7 @@ public class InventoryWardEdit extends ModalJFrame {
 					OHServiceExceptionUtil.showMessages(e);
 					MessageDialog.info(null, "angal.inventory.pleasevalidateinventoryagainsbeforeconfirmation.msg");
 					confirmButton.setEnabled(false);
+					return;
 				}
 			}
 		});
@@ -775,11 +774,7 @@ public class InventoryWardEdit extends ModalJFrame {
 			int reset = MessageDialog.yesNo(null, "angal.inventory.doyoureallywanttocleanthistable.msg");
 			if (reset == JOptionPane.YES_OPTION) {
 				if (inventory != null) {
-					for (MedicalInventoryRow invRow : inventoryRowSearchList) {
-						if (invRow.getId() != 0) {
-							inventoryRowsToDelete.add(invRow);
-						}
-					}
+					inventoryRowsToDelete.addAll(inventoryRowSearchList);
 				}
 				selectAll = false;
 				codeTextField.setEnabled(true);
@@ -828,6 +823,8 @@ public class InventoryWardEdit extends ModalJFrame {
 					}
 				}
 				jTableInventoryRow.clearSelection();
+			} else {
+				return;
 			}
 		});
 		return deleteButton;
@@ -968,10 +965,13 @@ public class InventoryWardEdit extends ModalJFrame {
 				int reset = MessageDialog.yesNoCancel(null, "angal.inventory.doyouwanttosavethechanges.msg");
 				if (reset == JOptionPane.YES_OPTION) {
 					this.saveButton.doClick();
+					dispose();
 				}
 				if (reset == JOptionPane.NO_OPTION) {
 					resetVariable();
 					dispose();
+				} else {
+					return;
 				}
 			} else {
 				resetVariable();
