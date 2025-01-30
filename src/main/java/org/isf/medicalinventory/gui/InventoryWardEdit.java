@@ -57,7 +57,6 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -199,8 +198,8 @@ public class InventoryWardEdit extends ModalJFrame {
 	};
 	private final Class[] lotSelectionColumnClasses = { String.class, String.class, String.class };
 	private MedicalInventory inventory;
-	private JLabel specificRadio;
-	private JRadioButton allRadio;
+	private JLabel specificProduct;
+	private JButton selectButton;
 	private JLabel dateInventoryLabel;
 	private JTextField codeTextField;
 	private String code;
@@ -275,7 +274,7 @@ public class InventoryWardEdit extends ModalJFrame {
 			resetButton.setVisible(false);
 			referenceTextField.setVisible(false);
 			jCalendarInventory.setEnabled(false);
-			allRadio.setEnabled(false);
+			selectButton.setEnabled(false);
 			wardComboBox.setEnabled(false);
 			printButton.setVisible(true);
 			lotButton.setVisible(false);
@@ -289,7 +288,7 @@ public class InventoryWardEdit extends ModalJFrame {
 			resetButton.setVisible(true);
 			referenceTextField.setEditable(true);
 			jCalendarInventory.setEnabled(true);
-			allRadio.setEnabled(true);
+			selectButton.setEnabled(true);
 			wardComboBox.setEnabled(true);
 			lotButton.setVisible(true);
 			if (inventory != null && inventory.getStatus().equals(InventoryStatus.validated.toString())) {
@@ -361,19 +360,19 @@ public class InventoryWardEdit extends ModalJFrame {
 			gbc_specificRadio.insets = new Insets(0, 0, 0, 5);
 			gbc_specificRadio.gridx = 0;
 			gbc_specificRadio.gridy = 4;
-			panelHeader.add(getSpecificRadio(), gbc_specificRadio);
+			panelHeader.add(getSpecificProductLabel(), gbc_specificRadio);
 			GridBagConstraints gbc_codeTextField = new GridBagConstraints();
 			gbc_codeTextField.insets = new Insets(0, 0, 0, 5);
 			gbc_codeTextField.fill = GridBagConstraints.HORIZONTAL;
 			gbc_codeTextField.gridx = 1;
 			gbc_codeTextField.gridy = 4;
 			panelHeader.add(getCodeTextField(), gbc_codeTextField);
-			GridBagConstraints gbc_allRadio = new GridBagConstraints();
-			gbc_allRadio.anchor = GridBagConstraints.EAST;
-			gbc_allRadio.insets = new Insets(0, 0, 0, 5);
-			gbc_allRadio.gridx = 2;
-			gbc_allRadio.gridy = 4;
-			panelHeader.add(getAllRadio(), gbc_allRadio);
+			GridBagConstraints gbc_selectButton = new GridBagConstraints();
+			gbc_selectButton.anchor = GridBagConstraints.EAST;
+			gbc_selectButton.insets = new Insets(0, 0, 0, 5);
+			gbc_selectButton.gridx = 2;
+			gbc_selectButton.gridy = 4;
+			panelHeader.add(getSelectButton(), gbc_selectButton);
 		}
 		return panelHeader;
 	}
@@ -424,6 +423,59 @@ public class InventoryWardEdit extends ModalJFrame {
 			});
 		}
 		return jCalendarInventory;
+	}
+
+	private JButton getSelectButton() {
+		if (selectButton == null) {
+			selectButton = new JButton(MessageBundle.getMessage("angal.inventory.allproduct.btn"));
+			selectButton.setSelected(inventory != null);
+			selectButton.addActionListener(actionEvent -> {
+				if (!selectAll) {
+					if (selectButton.isSelected()) {
+						codeTextField.setEnabled(false);
+						codeTextField.setText("");
+						if (!inventoryRowSearchList.isEmpty()) {
+							int info = MessageDialog.yesNo(null, "angal.inventory.doyouwanttoaddallnotyetlistedproducts.msg");
+							if (info == JOptionPane.YES_OPTION) {
+								try {
+									selectButton.setSelected(true);
+									jTableInventoryRow.setModel(new InventoryRowModel(true));
+								} catch (OHServiceException e) {
+									OHServiceExceptionUtil.showMessages(e);
+								}
+							} else {
+								selectButton.setSelected(false);
+								specificProduct.setEnabled(true);
+								selectAll = false;
+							}
+						} else {
+							if (mode.equals("update")) {
+								try {
+									selectButton.setEnabled(true);
+									jTableInventoryRow.setModel(new InventoryRowModel(true));
+								} catch (OHServiceException e) {
+									OHServiceExceptionUtil.showMessages(e);
+								}
+							} else {
+								try {
+									jTableInventoryRow.setModel(new InventoryRowModel());
+								} catch (OHServiceException e) {
+									OHServiceExceptionUtil.showMessages(e);
+								}
+							}
+						}
+						if (inventory != null && !inventory.getStatus().equals(InventoryStatus.draft.toString())) {
+							inventory.setStatus(InventoryStatus.draft.toString());
+						}
+						fireInventoryUpdated();
+						code = null;
+					}
+				} else {
+					MessageDialog.info(null, "angal.inventory.youhavealreadyaddedallproduct.msg");
+				}
+			});
+		}
+		return selectButton;
 	}
 
 	private JButton getSaveButton() {
@@ -1002,7 +1054,7 @@ public class InventoryWardEdit extends ModalJFrame {
 			if (inventory != null) {
 				inventoryRowList = medicalInventoryRowManager.getMedicalInventoryRowByInventoryId(inventory.getId());
 			} else {
-				if (allRadio.isSelected()) {
+				if (selectButton.isSelected()) {
 					inventoryRowList = loadNewInventoryTable(null, inventory, false);
 				}
 			}
@@ -1177,64 +1229,11 @@ public class InventoryWardEdit extends ModalJFrame {
 		return found;
 	}
 
-	private JLabel getSpecificRadio() {
-		if (specificRadio == null) {
-			specificRadio = new JLabel(MessageBundle.getMessage("angal.inventory.specificproduct.btn"));
+	private JLabel getSpecificProductLabel() {
+		if (specificProduct == null) {
+			specificProduct = new JLabel(MessageBundle.getMessage("angal.inventory.specificproduct.btn"));
 		}
-		return specificRadio;
-	}
-
-	private JRadioButton getAllRadio() {
-		if (allRadio == null) {
-			allRadio = new JRadioButton(MessageBundle.getMessage("angal.inventory.allproduct.btn"));
-			allRadio.setSelected(inventory != null);
-			allRadio.addActionListener(actionEvent -> {
-				if (!selectAll) {
-					if (allRadio.isSelected()) {
-						codeTextField.setEnabled(false);
-						codeTextField.setText("");
-						if (!inventoryRowSearchList.isEmpty()) {
-							int info = MessageDialog.yesNo(null, "angal.inventory.doyouwanttoaddallnotyetlistedproducts.msg");
-							if (info == JOptionPane.YES_OPTION) {
-								try {
-									allRadio.setSelected(true);
-									jTableInventoryRow.setModel(new InventoryRowModel(true));
-								} catch (OHServiceException e) {
-									OHServiceExceptionUtil.showMessages(e);
-								}
-							} else {
-								allRadio.setSelected(false);
-								specificRadio.setEnabled(true);
-								selectAll = false;
-							}
-						} else {
-							if (mode.equals("update")) {
-								try {
-									allRadio.setEnabled(true);
-									jTableInventoryRow.setModel(new InventoryRowModel(true));
-								} catch (OHServiceException e) {
-									OHServiceExceptionUtil.showMessages(e);
-								}
-							} else {
-								try {
-									jTableInventoryRow.setModel(new InventoryRowModel());
-								} catch (OHServiceException e) {
-									OHServiceExceptionUtil.showMessages(e);
-								}
-							}
-						}
-						if (inventory != null && !inventory.getStatus().equals(InventoryStatus.draft.toString())) {
-							inventory.setStatus(InventoryStatus.draft.toString());
-						}
-						fireInventoryUpdated();
-						code = null;
-					}
-				} else {
-					MessageDialog.info(null, "angal.inventory.youhavealreadyaddedallproduct.msg");
-				}
-			});
-		}
-		return allRadio;
+		return specificProduct;
 	}
 
 	private JLabel getDateInventoryLabel() {
@@ -1516,9 +1515,9 @@ public class InventoryWardEdit extends ModalJFrame {
 
 	private void disabledSomeComponents() {
 		jCalendarInventory.setEnabled(false);
-		specificRadio.setEnabled(false);
+		specificProduct.setEnabled(false);
 		codeTextField.setEnabled(false);
-		allRadio.setEnabled(false);
+		selectButton.setEnabled(false);
 		referenceTextField.setEnabled(false);
 		jTableInventoryRow.setEnabled(false);
 		saveButton.setEnabled(false);
@@ -1529,9 +1528,9 @@ public class InventoryWardEdit extends ModalJFrame {
 
 	private void activateSomeComponents() {
 		jCalendarInventory.setEnabled(true);
-		specificRadio.setEnabled(true);
+		specificProduct.setEnabled(true);
 		codeTextField.setEnabled(true);
-		allRadio.setEnabled(true);
+		selectButton.setEnabled(true);
 		referenceTextField.setEnabled(true);
 		jTableInventoryRow.setEnabled(true);
 		wardComboBox.setEnabled(false);

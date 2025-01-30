@@ -207,13 +207,14 @@ public class InventoryEdit extends ModalJFrame {
 	private Class< ? >[] columnsClasses = { String.class, Integer.class, String.class, String.class, String.class, LocalDate.class, Integer.class,
 			Integer.class, BigDecimal.class, BigDecimal.class };
 	private MedicalInventory inventory;
-	private JLabel specificRadio;
+	private JLabel specificProduct;
+	private JButton selectButton;
 	private JLabel dateInventoryLabel;
 	private JTextField codeTextField;
 	private String code;
 	private String mode;
-	private JLabel referenceLabel;
 	private JLabel statusLabel;
+	private JLabel referenceLabel;
 	private JLabel chargeTypeLabel;
 	private JLabel dischargeTypeLabel;
 	private JLabel supplierLabel;
@@ -230,7 +231,6 @@ public class InventoryEdit extends ModalJFrame {
 	private Supplier supplier;
 	private Ward destination;
 	private String newReference;
-	private JButton selectButton;
 	private JFrame frame;
 	private JPanel mainPanel;
 	private JRadioButton radioButtonAll;
@@ -438,7 +438,7 @@ public class InventoryEdit extends ModalJFrame {
 			gbc_specificRadio.insets = new Insets(0, 0, 0, 5);
 			gbc_specificRadio.gridx = 0;
 			gbc_specificRadio.gridy = 3;
-			panelHeader.add(getSpecificRadio(), gbc_specificRadio);
+			panelHeader.add(getSpecificProductLabel(), gbc_specificRadio);
 			GridBagConstraints gbc_codeTextField = new GridBagConstraints();
 			gbc_codeTextField.insets = new Insets(0, 0, 0, 5);
 			gbc_codeTextField.fill = GridBagConstraints.HORIZONTAL;
@@ -456,7 +456,7 @@ public class InventoryEdit extends ModalJFrame {
 			gbc_selectButton.insets = new Insets(0, 0, 0, 5);
 			gbc_selectButton.gridx = 3;
 			gbc_selectButton.gridy = 3;
-			panelHeader.add(getSelectedButton(), gbc_selectButton);
+			panelHeader.add(getSelectButton(), gbc_selectButton);
 		}
 		return panelHeader;
 	}
@@ -509,10 +509,9 @@ public class InventoryEdit extends ModalJFrame {
 		return jCalendarInventory;
 	}
 
-	private JButton getSelectedButton() {
+	private JButton getSelectButton() {
 		if (selectButton == null) {
-			selectButton = new JButton(MessageBundle.getMessage("angal.common.select.btn"));
-			selectButton.setMnemonic(MessageBundle.getMnemonic("angal.common.select.btn.key"));
+			selectButton = new JButton(MessageBundle.getMessage("angal.inventory.allproduct.btn"));
 			selectButton.addActionListener(actionEvent -> {
 				mainPanel = new JPanel();
 				mainPanel.setLayout(new BorderLayout(10, 10));
@@ -1523,11 +1522,11 @@ public class InventoryEdit extends ModalJFrame {
 		this.inventory = inventory;
 	}
 
-	private JLabel getSpecificRadio() {
-		if (specificRadio == null) {
-			specificRadio = new JLabel(MessageBundle.getMessage("angal.inventory.specificproduct.txt"));
+	private JLabel getSpecificProductLabel() {
+		if (specificProduct == null) {
+			specificProduct = new JLabel(MessageBundle.getMessage("angal.inventory.specificproduct.txt"));
 		}
-		return specificRadio;
+		return specificProduct;
 	}
 
 	private JLabel getDateInventoryLabel() {
