@@ -517,7 +517,8 @@ public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 
 		public InventoryBrowsingModel(int page, int pageSize) {
 			inventoryList = new ArrayList<>();
-			String status = statusComboBox.getSelectedIndex() > 0 ? statusComboBox.getSelectedItem().toString().toLowerCase() : null;
+			String selectedStatus = statusComboBox.getSelectedIndex() > 0 ? statusComboBox.getSelectedItem().toString() : null;
+			String status = medicalInventoryManager.getKeyByStatus(selectedStatus);
 			String type = InventoryType.main.toString();
 			try {
 				Page<MedicalInventory> medInventorypage = medicalInventoryManager.getMedicalInventoryByParamsPageable(dateFrom, dateTo, status, type, page,
@@ -585,7 +586,7 @@ public class InventoryBrowser extends ModalJFrame implements InventoryListener {
 			statusComboBox.addActionListener(actionEvent -> {
 				totalRows = medicalInventoryManager.getInventoryCount(InventoryType.main.toString());
 				startIndex = 0;
-				int page = 1;
+				int page = 0;
 				previous.setEnabled(false);
 				if (totalRows <= PAGE_SIZE) {
 					next.setEnabled(false);
