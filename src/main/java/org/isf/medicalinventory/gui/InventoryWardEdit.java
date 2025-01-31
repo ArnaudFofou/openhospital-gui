@@ -439,11 +439,11 @@ public class InventoryWardEdit extends ModalJFrame {
 					}
 					try {
 						jTableInventoryRow.setModel(new InventoryRowModel(true));
+						if (inventory != null) {
+							inventory.setStatus(InventoryStatus.draft.toString());
+						}
 					} catch (OHServiceException e) {
 						OHServiceExceptionUtil.showMessages(e);
-					}
-					if (inventory != null) {
-						inventory.setStatus(InventoryStatus.draft.toString());
 					}
 					fireInventoryUpdated();
 					code = null;
