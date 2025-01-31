@@ -442,7 +442,7 @@ public class InventoryWardEdit extends ModalJFrame {
 					} catch (OHServiceException e) {
 						OHServiceExceptionUtil.showMessages(e);
 					}
-					if (inventory != null && !inventory.getStatus().equals(InventoryStatus.draft.toString())) {
+					if (inventory != null) {
 						inventory.setStatus(InventoryStatus.draft.toString());
 					}
 					fireInventoryUpdated();
