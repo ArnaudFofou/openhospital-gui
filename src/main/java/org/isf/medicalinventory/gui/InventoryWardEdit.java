@@ -431,45 +431,22 @@ public class InventoryWardEdit extends ModalJFrame {
 			selectButton.setSelected(inventory != null);
 			selectButton.addActionListener(actionEvent -> {
 				if (!selectAll) {
-					if (selectButton.isSelected()) {
-						codeTextField.setEnabled(false);
-						codeTextField.setText("");
-						if (!inventoryRowSearchList.isEmpty()) {
-							int info = MessageDialog.yesNo(null, "angal.inventory.doyouwanttoaddallnotyetlistedproducts.msg");
-							if (info == JOptionPane.YES_OPTION) {
-								try {
-									selectButton.setSelected(true);
-									jTableInventoryRow.setModel(new InventoryRowModel(true));
-								} catch (OHServiceException e) {
-									OHServiceExceptionUtil.showMessages(e);
-								}
-							} else {
-								selectButton.setSelected(false);
-								specificProduct.setEnabled(true);
-								selectAll = false;
-							}
-						} else {
-							if (mode.equals("update")) {
-								try {
-									selectButton.setEnabled(true);
-									jTableInventoryRow.setModel(new InventoryRowModel(true));
-								} catch (OHServiceException e) {
-									OHServiceExceptionUtil.showMessages(e);
-								}
-							} else {
-								try {
-									jTableInventoryRow.setModel(new InventoryRowModel());
-								} catch (OHServiceException e) {
-									OHServiceExceptionUtil.showMessages(e);
-								}
-							}
+					if (!inventoryRowSearchList.isEmpty()) {
+						int info = MessageDialog.yesNo(null, "angal.inventory.doyouwanttoaddallnotyetlistedproducts.msg");
+						if (info != JOptionPane.YES_OPTION) {
+							return;
 						}
-						if (inventory != null && !inventory.getStatus().equals(InventoryStatus.draft.toString())) {
-							inventory.setStatus(InventoryStatus.draft.toString());
-						}
-						fireInventoryUpdated();
-						code = null;
 					}
+					try {
+						jTableInventoryRow.setModel(new InventoryRowModel(true));
+					} catch (OHServiceException e) {
+						OHServiceExceptionUtil.showMessages(e);
+					}
+					if (inventory != null && !inventory.getStatus().equals(InventoryStatus.draft.toString())) {
+						inventory.setStatus(InventoryStatus.draft.toString());
+					}
+					fireInventoryUpdated();
+					code = null;
 				} else {
 					MessageDialog.info(null, "angal.inventory.youhavealreadyaddedallproduct.msg");
 				}
@@ -823,6 +800,7 @@ public class InventoryWardEdit extends ModalJFrame {
 					}
 				}
 				jTableInventoryRow.clearSelection();
+				selectAll = false;
 			} else {
 				return;
 			}
@@ -1047,6 +1025,7 @@ public class InventoryWardEdit extends ModalJFrame {
 				MessageDialog.info(null, "angal.inventory.youhavealreadyaddedallproduct.msg");
 			}
 		}
+
 		public InventoryRowModel() throws OHServiceException {
 			if (!inventoryRowSearchList.isEmpty()) {
 				inventoryRowSearchList.clear();
