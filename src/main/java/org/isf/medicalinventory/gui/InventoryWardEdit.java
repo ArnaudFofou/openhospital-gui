@@ -484,6 +484,7 @@ public class InventoryWardEdit extends ModalJFrame {
 				List<MedicalInventoryRow> newMedicalInventoryRows = new ArrayList<>();
 				if (mode.equals("new")) {
 					newReference = referenceTextField.getText().trim();
+					wardSelected = (Ward) wardComboBox.getSelectedItem();
 					boolean refExist = medicalInventoryManager.referenceExists(newReference);
 					if (refExist) {
 						MessageDialog.error(null, "angal.inventory.referencealreadyused.msg");
