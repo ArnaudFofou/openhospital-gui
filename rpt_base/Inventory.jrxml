@@ -13,6 +13,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<import value="net.sf.jasperreports.engine.*"/>
 	<import value="java.util.*"/>
 	<import value="net.sf.jasperreports.engine.data.*"/>
@@ -21,7 +22,7 @@
 	<parameter name="City" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="Email" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="Telephone" class="java.lang.String" isForPrompting="false"/>
-	<parameter name="inventoryId" class="java.lang.String"/>
+	<parameter name="inventoryId" class="java.lang.Integer"/>
 	<parameter name="inventoryDate" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="inventoryReference" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="inventoryStatus" class="java.lang.String" isForPrompting="false"/>
@@ -31,8 +32,8 @@
 	</parameter>
 	<queryString>
 		<![CDATA[SELECT DATE_FORMAT(LT_DUE_DATE, '%d/%m/%Y') AS LT_DUE_DATE, LT_DUE_DATE,MDSR_CODE,MDSR_DESC,LT_ID_A,MINVTR_THEORETIC_QTY,MINVTR_REAL_QTY
-			 FROM ((`oh_medicaldsrinventoryrow` join `oh_medicaldsrinventory` ON MINVTR_INVT_ID=MINVT_ID)
-			join `oh_medicaldsr` on MINVTR_MDSR_ID=MDSR_ID)
+			 FROM `oh_medicaldsrinventoryrow` join `oh_medicaldsrinventory` ON MINVTR_INVT_ID=MINVT_ID
+			join `oh_medicaldsr` on MINVTR_MDSR_ID=MDSR_ID
 			left join `oh_medicaldsrlot` on MINVTR_LT_ID_A=LT_ID_A
 			where MINVTR_INVT_ID = $P{inventoryId} ORDER BY MDSR_DESC asc]]>
 	</queryString>

@@ -923,7 +923,7 @@ public class InventoryWardEdit extends ModalJFrame {
 			if (response == JOptionPane.YES_OPTION) {
 				printRealQty = 1;
 			}
-			new GenericReportPharmaceuticalInventory(inventory, "InventoryWard", printRealQty);
+			new GenericReportPharmaceuticalInventory(this.inventory, "InventoryWard", printRealQty);
 		});
 		return printButton;
 	}
