@@ -138,6 +138,7 @@ public class PatientExaminationEdit extends ModalJFrame {
 	private JButton jButtonDelete;
 	private JButton jButtonClose;
 	private JButton jButtonPrint;
+	private JButton jButtonSaveAndPrint;
 	private Action actionSavePatientExamination;
 	private Action actionToggleAP;
 	private Action actionToggleHR;
@@ -250,6 +251,7 @@ public class PatientExaminationEdit extends ModalJFrame {
 		if (jPanelButtons == null) {
 			jPanelButtons = new JPanel();
 			jPanelButtons.add(getJButtonSave());
+			jPanelButtons.add(getJButtonSaveAndPrint());
 			jPanelButtons.add(getJButtonDelete());
 			jPanelButtons.add(getJButtonPrint());
 			jPanelButtons.add(getJButtonClose());
@@ -1370,6 +1372,47 @@ public class PatientExaminationEdit extends ModalJFrame {
 			});
 		}
 		return jButtonPrint;
+	}
+	
+	private JButton getJButtonSaveAndPrint() {
+		if (jButtonSaveAndPrint == null) {
+			jButtonSaveAndPrint = new JButton(MessageBundle.getMessage("angal.common.saveandprint.btn"));
+			jButtonSaveAndPrint.setMnemonic(MessageBundle.getMnemonic("angal.common.saveandprint.btn.key"));
+			jButtonSaveAndPrint.addActionListener(actionEvent -> {
+				double weight = patex.getPex_weight();
+				int height = patex.getPex_height();
+
+				if (weight != 0 && height != 0) {
+					if (weight == ExaminationParameters.WEIGHT_MIN || weight == ExaminationParameters.WEIGHT_MAX || height == ExaminationParameters.HEIGHT_MIN || height == ExaminationParameters.HEIGHT_MAX) {
+						int response = MessageDialog.yesNo(null, "angal.patient.examination.minmaxvalues.msg");
+						if (response == JOptionPane.YES_OPTION) {
+							try {
+								PatientExamination exam = examinationBrowserManager.saveOrUpdate(patex);
+								new GenericReportExamination(patex.getPatient().getCode(), exam.getPex_ID(), GeneralData.EXAMINATIONCHART);
+								modified = false;
+							} catch (OHServiceException ohServiceException) {
+								MessageDialog.showExceptions(ohServiceException);
+							}
+							JTableModelSummary model = (JTableModelSummary) jTableSummary.getModel();
+							model.reloadData();
+						}
+					} else {
+						try {
+							PatientExamination exam = examinationBrowserManager.saveOrUpdate(patex);
+							new GenericReportExamination(patex.getPatient().getCode(), exam.getPex_ID(), GeneralData.EXAMINATIONCHART);
+							modified = false;
+						} catch (OHServiceException ohServiceException) {
+							MessageDialog.showExceptions(ohServiceException);
+						}
+						JTableModelSummary model = (JTableModelSummary) jTableSummary.getModel();
+						model.reloadData();
+					}
+				} else {
+					MessageDialog.error(null, "angal.patient.examination.nonzero.msg");
+				}
+			});
+		}
+		return jButtonSaveAndPrint;
 	}
 
 	private JPanel getJPanelGender() {
